@@ -19,22 +19,19 @@
         <p class="text-yellow-400">by camiloven</p>
     </div>
 
-    <!-- Botones Fuentes -->
     <div class="grid grid-cols-3 gap-3 p-6">
-        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">⛏️ Betmines</button>
-        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">📊 Forebet</button>
-        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">📈 AdamChoi</button>
+        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">⛏️ Betmines</button>
+        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">📊 Forebet</button>
+        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">📈 AdamChoi</button>
     </div>
 
     <div class="px-6">
-        <button onclick="document.getElementById('fileInput').click()" 
-                class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
+        <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
             📁 CARGAR EXCEL
         </button>
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
     </div>
 
-    <!-- Tabs Deportes -->
     <div id="sportTabs" class="flex gap-2 px-6 overflow-x-auto pb-4"></div>
 
     <div id="content" class="px-6"></div>
@@ -43,12 +40,12 @@
 let allData = {};
 let currentSport = '';
 
-document.getElementById('fileInput').onchange = e => {
+document.getElementById('fileInput').onchange = function(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = function(ev) {
         try {
             const wb = XLSX.read(ev.target.result, {type:'binary'});
             allData = {};
@@ -57,11 +54,10 @@ document.getElementById('fileInput').onchange = e => {
                 if (data.length > 0) allData[name] = data;
             });
 
-            // Crear tabs correctamente
             let tabsHTML = '';
             Object.keys(allData).forEach(sport => {
-                const active = currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white';
-                tabsHTML += `<button onclick="switchSport('${sport}')" class="tab \( {active}"> \){sport}</button>`;
+                const isActive = currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white';
+                tabsHTML += `<button onclick="switchSport('${sport}')" class="tab \( {isActive}"> \){sport}</button>`;
             });
             document.getElementById('sportTabs').innerHTML = tabsHTML;
 
@@ -105,7 +101,7 @@ window.switchSport = function(sport) {
         </div>`;
     });
 
-    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos en esta hoja</p>';
+    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos</p>';
 };
 </script>
 </body>
