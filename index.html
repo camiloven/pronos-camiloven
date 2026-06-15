@@ -11,6 +11,8 @@
         .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
         .card {background:#171717; border:1px solid #444; border-radius:16px; padding:18px; margin:12px 0;}
         .tab {padding:12px 20px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
+        .photo-card {background:#171717; border:1px solid #444; border-radius:16px; padding:12px; margin:12px 0;}
+        .photo {max-width:100%; border-radius:12px;}
     </style>
 </head>
 <body class="pb-20">
@@ -27,12 +29,24 @@
 
     <div class="px-6">
         <button onclick="document.getElementById('fileInput').click()" 
-                class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
+                class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl mb-3">
             📁 CARGAR NUEVO EXCEL
         </button>
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
     </div>
 
+    <!-- Subir Fotos -->
+    <div class="px-6 mb-6">
+        <button onclick="document.getElementById('photoInput').click()" 
+                class="w-full bg-zinc-800 hover:bg-zinc-700 py-5 rounded-3xl font-bold">
+            📸 SUBIR FOTOS DE PREDICCIONES
+        </button>
+        <input type="file" id="photoInput" accept="image/*" multiple class="hidden">
+    </div>
+
+    <div id="photosContainer" class="px-6 grid grid-cols-1 gap-4"></div>
+
+    <!-- Tabs Deportes -->
     <div id="sportTabs" class="flex flex-wrap gap-2 px-6 pb-4"></div>
 
     <div id="content" class="px-6"></div>
@@ -41,7 +55,7 @@
 let allData = {};
 let currentSport = '';
 
-// Cargar datos guardados
+// Cargar Excel guardado
 if (localStorage.getItem('pronosticosData')) {
     allData = JSON.parse(localStorage.getItem('pronosticosData'));
 }
@@ -53,7 +67,7 @@ function renderTabs() {
         const btn = document.createElement('button');
         btn.textContent = sport;
         btn.className = `tab ${currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
-        btn.onclick = () => switchSport(sport);
+        btn.onclick = () => window.switchSport(sport);
         container.appendChild(btn);
     });
 }
@@ -87,15 +101,16 @@ window.switchSport = function(sport) {
         </div>`;
     });
 
-    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500 py-12">Sin datos en esta hoja</p>';
+    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500 py-12">Sin datos</p>';
 };
 
 // Cargar al iniciar
 if (Object.keys(allData).length > 0) {
     renderTabs();
-    switchSport(Object.keys(allData)[0]);
+    window.switchSport(Object.keys(allData)[0]);
 }
 
+// Excel upload
 document.getElementById('fileInput').onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -112,12 +127,32 @@ document.getElementById('fileInput').onchange = e => {
 
             localStorage.setItem('pronosticosData', JSON.stringify(allData));
             renderTabs();
-            switchSport(Object.keys(allData)[0]);
+            window.switchSport(Object.keys(allData)[0]);
         } catch(err) {
             alert('Error leyendo el Excel');
         }
     };
     reader.readAsBinaryString(file);
+};
+
+// Fotos upload
+document.getElementById('photoInput').onchange = e => {
+    const files = e.target.files;
+    const container = document.getElementById('photosContainer');
+    
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const div = document.createElement('div');
+            div.className = 'photo-card';
+            div.innerHTML = `
+                <img src="${ev.target.result}" class="photo">
+                <p class="text-xs text-zinc-400 mt-2">Foto subida • ${new Date().toLocaleTimeString()}</p>
+            `;
+            container.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
 };
 </script>
 </body>
