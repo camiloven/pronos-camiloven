@@ -10,7 +10,8 @@
         body {background:#09090b; color:white; font-family:system-ui,sans-serif; margin:0;}
         .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
         .card {background:#171717; border:1px solid #444; border-radius:16px; padding:18px; margin:12px 0;}
-        .tab {padding:10px 18px; border-radius:9999px; font-weight:bold; white-space:nowrap;}
+        .tab {padding:10px 20px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin-right:8px;}
+        .photo {max-width:100%; border-radius:12px; margin:8px 0;}
     </style>
 </head>
 <body class="pb-20">
@@ -21,17 +22,26 @@
 
     <!-- Botones Fuentes -->
     <div class="grid grid-cols-3 gap-3 p-6">
-        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">⛏️ Betmines</button>
-        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">📊 Forebet</button>
-        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">📈 AdamChoi</button>
+        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">⛏️ Betmines</button>
+        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">📊 Forebet</button>
+        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">📈 AdamChoi</button>
     </div>
 
     <div class="px-6">
-        <button onclick="document.getElementById('fileInput').click()" 
-                class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
+        <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
             📁 CARGAR EXCEL
         </button>
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
+    </div>
+
+    <!-- Sección Fotos de Predicciones -->
+    <div class="p-6 border-t border-zinc-800">
+        <h2 class="text-yellow-400 text-xl font-bold mb-3">📸 Subir Fotos de Predicciones</h2>
+        <button onclick="document.getElementById('photoInput').click()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-4 rounded-3xl font-bold">
+            Subir capturas (Betmines / Forebet)
+        </button>
+        <input type="file" id="photoInput" accept="image/*" multiple class="hidden">
+        <div id="photos" class="mt-4 grid grid-cols-2 gap-3"></div>
     </div>
 
     <!-- Tabs Deportes -->
@@ -42,6 +52,15 @@
 <script>
 let allData = {};
 let currentSport = '';
+let uploadedPhotos = [];
+
+// Cargar Excel guardado
+const saved = localStorage.getItem('pronosticosData');
+if (saved) {
+    allData = JSON.parse(saved);
+    renderTabs();
+    if (Object.keys(allData).length > 0) switchSport(Object.keys(allData)[0]);
+}
 
 document.getElementById('fileInput').onchange = e => {
     const file = e.target.files[0];
@@ -57,22 +76,43 @@ document.getElementById('fileInput').onchange = e => {
                 if (data.length > 0) allData[name] = data;
             });
 
-            // Crear tabs
-            let tabsHTML = '';
-            Object.keys(allData).forEach(sport => {
-                tabsHTML += `<button onclick="switchSport('${sport}')" class="tab \( {currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}"> \){sport}</button>`;
-            });
-            document.getElementById('sportTabs').innerHTML = tabsHTML;
-
-            if (Object.keys(allData).length > 0) {
-                switchSport(Object.keys(allData)[0]);
-            }
+            localStorage.setItem('pronosticosData', JSON.stringify(allData));
+            renderTabs();
+            if (Object.keys(allData).length > 0) switchSport(Object.keys(allData)[0]);
         } catch(err) {
-            alert('Error al leer el archivo');
+            alert('Error al leer el archivo Excel');
         }
     };
     reader.readAsBinaryString(file);
 };
+
+// Subir fotos
+document.getElementById('photoInput').onchange = e => {
+    const files = e.target.files;
+    const photosDiv = document.getElementById('photos');
+    photosDiv.innerHTML = '';
+
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = document.createElement('img');
+            img.src = ev.target.result;
+            img.className = 'photo';
+            photosDiv.appendChild(img);
+            uploadedPhotos.push(ev.target.result);
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
+function renderTabs() {
+    let html = '';
+    Object.keys(allData).forEach(sport => {
+        const active = currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800';
+        html += `<button onclick="switchSport('${sport}')" class="tab \( {active}"> \){sport}</button>`;
+    });
+    document.getElementById('sportTabs').innerHTML = html;
+}
 
 window.switchSport = function(sport) {
     currentSport = sport;
@@ -82,7 +122,7 @@ window.switchSport = function(sport) {
     data.forEach(p => {
         html += `
         <div class="card">
-            <div style="color:#eab308;font-size:14px">${p.date || ''}</div>
+            <div style="color:#eab308">${p.date || ''}</div>
             <div style="font-size:19px;font-weight:bold;margin:12px 0">
                 ${p.home || '?'} <span style="color:#666">vs</span> ${p.away || '?'}
             </div>
@@ -100,11 +140,11 @@ window.switchSport = function(sport) {
                     <div style="font-size:11px">VISITA</div>
                 </div>
             </div>
-            ${p['o_2.5'] ? `<div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">Over 2.5: ${Math.round(p['o_2.5']*100)}%</div>` : ''}
+            ${p['o_2.5'] !== undefined ? `<div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">Over 2.5: ${Math.round(p['o_2.5']*100)}%</div>` : ''}
         </div>`;
     });
 
-    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos en esta hoja</p>';
+    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos</p>';
 };
 </script>
 </body>
