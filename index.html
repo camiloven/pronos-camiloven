@@ -13,7 +13,6 @@
         .tab {padding:12px 20px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
         .photo-card {background:#171717; border:1px solid #444; border-radius:16px; padding:12px; margin:12px 0;}
         .photo {max-width:100%; border-radius:12px;}
-        .analysis-result {background:#1f1f23; border:1px solid #eab308; border-radius:12px; padding:14px; margin:12px 0;}
     </style>
 </head>
 <body class="pb-20">
@@ -53,8 +52,10 @@ let allData = {};
 let currentSport = '';
 let groqKey = localStorage.getItem('groqKey') || '';
 
-// Cargar Excel guardado
-if (localStorage.getItem('pronosticosData')) allData = JSON.parse(localStorage.getItem('pronosticosData'));
+// Cargar Excel
+if (localStorage.getItem('pronosticosData')) {
+    allData = JSON.parse(localStorage.getItem('pronosticosData'));
+}
 
 function renderTabs() {
     const container = document.getElementById('sportTabs');
@@ -73,7 +74,16 @@ window.switchSport = function(sport) {
     const data = allData[sport] || [];
     let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 capitalize">${sport}</h2>`;
     data.forEach(p => {
-        html += `<div class="card">... (mismo card de antes) ...</div>`;
+        html += `
+        <div class="card">
+            <div style="color:#eab308">${p.date || ''}</div>
+            <div style="font-size:19px;font-weight:bold;margin:12px 0">${p.home || '?'} vs ${p.away || '?'}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:#111;padding:16px;border-radius:12px">
+                <div style="text-align:center"><div style="color:#4ade80;font-size:22px">${Math.round((p['1x2_h']||0)*100)}%</div><div style="font-size:11px">LOCAL</div></div>
+                <div style="text-align:center"><div style="color:#fcd34d;font-size:22px">${Math.round((p['1x2_d']||0)*100)}%</div><div style="font-size:11px">EMPATE</div></div>
+                <div style="text-align:center"><div style="color:#f87171;font-size:22px">${Math.round((p['1x2_a']||0)*100)}%</div><div style="font-size:11px">VISITA</div></div>
+            </div>
+        </div>`;
     });
     document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500 py-12">Sin datos</p>';
 };
@@ -83,12 +93,30 @@ if (Object.keys(allData).length > 0) {
     window.switchSport(Object.keys(allData)[0]);
 }
 
-// Excel upload (funciona)
+// Excel
 document.getElementById('fileInput').onchange = e => {
-    // ... código anterior ...
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const wb = XLSX.read(ev.target.result, {type:'binary'});
+            allData = {};
+            wb.SheetNames.forEach(name => {
+                const sheetData = XLSX.utils.sheet_to_json(wb.Sheets[name]);
+                if (sheetData.length > 0) allData[name] = sheetData;
+            });
+            localStorage.setItem('pronosticosData', JSON.stringify(allData));
+            renderTabs();
+            window.switchSport(Object.keys(allData)[0]);
+        } catch(err) {
+            alert('Error leyendo el Excel');
+        }
+    };
+    reader.readAsBinaryString(file);
 };
 
-// Fotos + Análisis IA
+// Fotos y Análisis
 document.getElementById('photoInput').onchange = async e => {
     const files = e.target.files;
     const container = document.getElementById('photosContainer');
@@ -96,14 +124,19 @@ document.getElementById('photoInput').onchange = async e => {
     for (let file of files) {
         const reader = new FileReader();
         reader.onload = async (ev) => {
-            const base64 = ev.target.result.split(',')[1];
             const div = document.createElement('div');
             div.className = 'photo-card';
-            div.innerHTML = `<img src="${ev.target.result}" class="photo"><p class="text-yellow-400 mt-3">🔄 Analizando con IA...</p>`;
+            div.innerHTML = `<img src="${ev.target.result}" class="photo"><p class="text-yellow-400 mt-3">🔄 Analizando...</p>`;
             container.appendChild(div);
 
+            if (!groqKey) {
+                div.innerHTML += `<p class="text-red-400">Falta la API Key de Groq</p>`;
+                return;
+            }
+
             try {
-                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                const base64 = ev.target.result.split(',')[1];
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${groqKey}`,
@@ -114,19 +147,18 @@ document.getElementById('photoInput').onchange = async e => {
                         messages: [{
                             role: "user",
                             content: [
-                                {type: "text", text: "Extrae TODOS los partidos de esta imagen. Devuelve SOLO un JSON válido con este formato: [{\"home\":\"Equipo1\", \"away\":\"Equipo2\", \"date\":\"fecha\", \"1x2_h\":0.XX, \"1x2_d\":0.XX, \"1x2_a\":0.XX}]"},
+                                {type: "text", text: "Extrae los partidos de esta imagen y devuelve solo JSON con formato: [{home, away, 1x2_h, 1x2_d, 1x2_a}]"},
                                 {type: "image_url", image_url: {url: `data:image/jpeg;base64,${base64}`}}
                             ]
                         }],
-                        temperature: 0.2,
-                        max_tokens: 1000
+                        temperature: 0.3,
+                        max_tokens: 800
                     })
                 });
 
-                const data = await res.json();
-                const text = data.choices[0].message.content;
-
-                div.innerHTML += `<div class="analysis-result mt-3"><pre class="text-xs text-green-400 overflow-auto">${text}</pre></div>`;
+                const result = await response.json();
+                const text = result.choices[0].message.content;
+                div.innerHTML += `<div class="mt-3 p-3 bg-black rounded text-xs text-green-400 overflow-auto"><pre>${text}</pre></div>`;
             } catch (err) {
                 div.innerHTML += `<p class="text-red-400 mt-3">Error: ${err.message}</p>`;
             }
@@ -136,7 +168,7 @@ document.getElementById('photoInput').onchange = async e => {
 };
 
 function showConfig() {
-    const key = prompt("Ingresa tu Groq API Key:", groqKey);
+    const key = prompt("Ingresa tu Groq API Key (gsk_...):", groqKey);
     if (key) {
         groqKey = key.trim();
         localStorage.setItem('groqKey', groqKey);
