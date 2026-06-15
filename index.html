@@ -26,8 +26,7 @@
     </div>
 
     <div class="px-6">
-        <button onclick="document.getElementById('fileInput').click()" 
-                class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
+        <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
             📁 CARGAR NUEVO EXCEL
         </button>
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
@@ -41,7 +40,7 @@
 let allData = {};
 let currentSport = '';
 
-// Cargar datos guardados
+// Cargar datos guardados al abrir
 const saved = localStorage.getItem('pronosticosData');
 if (saved) {
     allData = JSON.parse(saved);
@@ -62,7 +61,7 @@ window.switchSport = function(sport) {
     currentSport = sport;
     const data = allData[sport] || [];
     let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 capitalize">${sport}</h2>`;
-
+    
     data.forEach(p => {
         html += `
         <div class="card">
@@ -88,7 +87,7 @@ window.switchSport = function(sport) {
         </div>`;
     });
 
-    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos en esta hoja</p>';
+    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos</p>';
 };
 
 document.getElementById('fileInput').onchange = e => {
