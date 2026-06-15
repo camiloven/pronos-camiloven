@@ -41,52 +41,28 @@
 let allData = {};
 let currentSport = '';
 
-// Cargar datos guardados al iniciar
+// Cargar datos guardados
 const saved = localStorage.getItem('pronosticosData');
 if (saved) {
     allData = JSON.parse(saved);
     renderTabs();
-    switchSport(Object.keys(allData)[0]);
+    if (Object.keys(allData).length > 0) switchSport(Object.keys(allData)[0]);
 }
 
-document.getElementById('fileInput').onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = ev => {
-        try {
-            const wb = XLSX.read(ev.target.result, {type:'binary'});
-            allData = {};
-            wb.SheetNames.forEach(name => {
-                const data = XLSX.utils.sheet_to_json(wb.Sheets[name]);
-                if (data.length > 0) allData[name] = data;
-            });
-
-            localStorage.setItem('pronosticosData', JSON.stringify(allData));
-            renderTabs();
-            switchSport(Object.keys(allData)[0]);
-        } catch(err) {
-            alert('Error al leer el archivo');
-        }
-    };
-    reader.readAsBinaryString(file);
-};
-
 function renderTabs() {
-    let tabsHTML = '';
+    let html = '';
     Object.keys(allData).forEach(sport => {
-        const active = currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white';
-        tabsHTML += `<button onclick="switchSport('${sport}')" class="tab \( {active}"> \){sport}</button>`;
+        const active = currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800';
+        html += `<button onclick="switchSport('${sport}')" class="tab \( {active}"> \){sport}</button>`;
     });
-    document.getElementById('sportTabs').innerHTML = tabsHTML;
+    document.getElementById('sportTabs').innerHTML = html;
 }
 
 window.switchSport = function(sport) {
     currentSport = sport;
     const data = allData[sport] || [];
     let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 capitalize">${sport}</h2>`;
-    
+
     data.forEach(p => {
         html += `
         <div class="card">
@@ -112,7 +88,31 @@ window.switchSport = function(sport) {
         </div>`;
     });
 
-    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos</p>';
+    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos en esta hoja</p>';
+};
+
+document.getElementById('fileInput').onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const wb = XLSX.read(ev.target.result, {type:'binary'});
+            allData = {};
+            wb.SheetNames.forEach(name => {
+                const data = XLSX.utils.sheet_to_json(wb.Sheets[name]);
+                if (data.length > 0) allData[name] = data;
+            });
+
+            localStorage.setItem('pronosticosData', JSON.stringify(allData));
+            renderTabs();
+            if (Object.keys(allData).length > 0) switchSport(Object.keys(allData)[0]);
+        } catch(err) {
+            alert('Error al leer el archivo');
+        }
+    };
+    reader.readAsBinaryString(file);
 };
 </script>
 </body>
