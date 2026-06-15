@@ -6,99 +6,116 @@
     <title>Pronos Camiloven</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {background:#0a0a0a; color:#e5e5e5; font-family:system-ui,sans-serif; margin:0;}
+        .card {background:#171717; border:1px solid #444; border-radius:20px; padding:20px; margin:16px 0;}
+        .tab {padding:12px 24px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
+    </style>
 </head>
-<body class="bg-zinc-950 text-white p-4">
+<body class="pb-12">
 
-<h1 class="text-4xl font-bold text-yellow-400 text-center mb-8">PRONOS CAMILOVEN</h1>
+    <div class="bg-gradient-to-r from-amber-500 to-yellow-500 text-black p-8 text-center">
+        <h1 class="text-4xl font-black">PRONOS CAMILOVEN</h1>
+        <p class="text-sm">HIGH PROBABILITY PICKS</p>
+    </div>
 
-<div class="grid grid-cols-3 gap-3 mb-8">
-    <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-900 p-4 rounded-2xl">Betmines</button>
-    <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-900 p-4 rounded-2xl">Forebet</button>
-    <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-900 p-4 rounded-2xl">AdamChoi</button>
-</div>
+    <div class="grid grid-cols-3 gap-3 p-6">
+        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-900 p-4 rounded-3xl text-center text-sm">Betmines</button>
+        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-900 p-4 rounded-3xl text-center text-sm">Forebet</button>
+        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-900 p-4 rounded-3xl text-center text-sm">AdamChoi</button>
+    </div>
 
-<button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-6 rounded-3xl text-xl mb-8">
-    📁 CARGAR EXCEL
-</button>
-<input type="file" id="fileInput" accept=".xlsx" class="hidden">
+    <div class="px-6">
+        <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-7 rounded-3xl font-bold text-xl">
+            📁 CARGAR EXCEL
+        </button>
+        <input type="file" id="fileInput" accept=".xlsx" class="hidden">
+    </div>
 
-<div id="sportTabs" class="flex flex-wrap gap-2 mb-6"></div>
-<div id="content"></div>
+    <div id="sportTabs" class="flex flex-wrap gap-2 px-6 pb-4"></div>
+    <div id="content" class="px-6"></div>
 
 <script>
 let allData = {};
 
-document.getElementById('fileInput').onchange = function(e) {
+if (localStorage.getItem('pronosticosData')) {
+    allData = JSON.parse(localStorage.getItem('pronosticosData'));
+}
+
+function renderTabs() {
+    const container = document.getElementById('sportTabs');
+    container.innerHTML = '';
+    Object.keys(allData).forEach(sport => {
+        const btn = document.createElement('button');
+        btn.textContent = sport.toUpperCase();
+        btn.className = `tab ${Object.keys(allData)[0] === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
+        btn.onclick = () => mostrarDeporte(sport);
+        container.appendChild(btn);
+    });
+}
+
+function mostrarDeporte(sport) {
+    const data = allData[sport] || [];
+    let html = `<h2 class="text-yellow-400 text-3xl font-bold mb-8 px-2 capitalize">${sport}</h2>`;
+
+    data.forEach(p => {
+        const h = Math.round((p['1x2_h']||0)*100);
+        const d = Math.round((p['1x2_d']||0)*100);
+        const a = Math.round((p['1x2_a']||0)*100);
+
+        let ouHTML = '';
+        const thresholds = [1.5, 2.5, 3.5];
+        thresholds.forEach(th => {
+            if (p[`o_${th}`] !== undefined) {
+                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Over \( {th}</span><span class="text-green-400 font-bold"> \){Math.round(p[`o_${th}`]*100)}%</span></div>`;
+            }
+            if (p[`u_${th}`] !== undefined) {
+                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Under \( {th}</span><span class="text-red-400 font-bold"> \){Math.round(p[`u_${th}`]*100)}%</span></div>`;
+            }
+        });
+
+        html += `
+        <div class="card">
+            <div class="text-amber-400">${p.date || ''}</div>
+            <div class="font-bold text-xl mt-2">${p.home} vs ${p.away}</div>
+            <div class="grid grid-cols-3 gap-6 mt-8 text-center">
+                <div><div class="text-4xl font-bold text-green-400">${h}%</div><div class="text-xs">LOCAL</div></div>
+                <div><div class="text-4xl font-bold text-yellow-400">${d}%</div><div class="text-xs">EMPATE</div></div>
+                <div><div class="text-4xl font-bold text-red-400">${a}%</div><div class="text-xs">VISITA</div></div>
+            </div>
+            \( {ouHTML ? `<div class="mt-6 bg-zinc-900 rounded-2xl p-4 text-sm"> \){ouHTML}</div>` : ''}
+        </div>`;
+    });
+
+    document.getElementById('content').innerHTML = html || '<p class="text-center py-24 text-gray-500">Carga tu Excel</p>';
+}
+
+document.getElementById('fileInput').onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = function(ev) {
+    reader.onload = ev => {
         try {
-            const wb = XLSX.read(ev.target.result, {type: 'binary'});
+            const wb = XLSX.read(ev.target.result, {type:'binary'});
             allData = {};
-            
-            wb.SheetNames.forEach(sheetName => {
-                const json = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
-                if (json.length > 0) allData[sheetName] = json;
+            wb.SheetNames.forEach(name => {
+                const sheetData = XLSX.utils.sheet_to_json(wb.Sheets[name]);
+                if (sheetData.length > 0) allData[name] = sheetData;
             });
-
             localStorage.setItem('pronosticosData', JSON.stringify(allData));
-            mostrarDatos();
+            renderTabs();
+            mostrarDeporte(Object.keys(allData)[0]);
         } catch(err) {
-            alert('Error al leer el Excel: ' + err.message);
+            alert('Error al leer el Excel');
         }
     };
     reader.readAsBinaryString(file);
 };
 
-function mostrarDatos() {
-    const tabs = document.getElementById('sportTabs');
-    const content = document.getElementById('content');
-    tabs.innerHTML = '';
-    content.innerHTML = '';
-
-    Object.keys(allData).forEach(sport => {
-        const btn = document.createElement('button');
-        btn.textContent = sport;
-        btn.className = "px-5 py-3 bg-zinc-800 rounded-full text-sm font-bold hover:bg-yellow-400 hover:text-black";
-        btn.onclick = () => mostrarDeporte(sport);
-        tabs.appendChild(btn);
-    });
-
-    if (Object.keys(allData).length > 0) {
-        mostrarDeporte(Object.keys(allData)[0]);
-    }
-}
-
-function mostrarDeporte(sport) {
-    const data = allData[sport] || [];
-    let html = `<h2 class="text-3xl font-bold text-yellow-400 mb-6">${sport}</h2>`;
-
-    data.forEach(p => {
-        const h = Math.round((p['1x2_h'] || 0) * 100);
-        const d = Math.round((p['1x2_d'] || 0) * 100);
-        const a = Math.round((p['1x2_a'] || 0) * 100);
-
-        html += `
-        <div class="bg-zinc-900 rounded-3xl p-6 mb-6">
-            <div class="text-amber-400">${p.date || ''}</div>
-            <div class="text-xl font-bold my-3">${p.home} vs ${p.away}</div>
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div><div class="text-4xl font-bold text-green-400">${h}%</div><div class="text-xs">LOCAL</div></div>
-                <div><div class="text-4xl font-bold text-yellow-400">${d}%</div><div class="text-xs">EMPATE</div></div>
-                <div><div class="text-4xl font-bold text-red-400">${a}%</div><div class="text-xs">VISITA</div></div>
-            </div>
-        </div>`;
-    });
-
-    document.getElementById('content').innerHTML = html;
-}
-
-// Cargar datos guardados
-if (localStorage.getItem('pronosticosData')) {
-    allData = JSON.parse(localStorage.getItem('pronosticosData'));
-    mostrarDatos();
+// Cargar datos guardados automáticamente
+if (Object.keys(allData).length > 0) {
+    renderTabs();
+    mostrarDeporte(Object.keys(allData)[0]);
 }
 </script>
 </body>
