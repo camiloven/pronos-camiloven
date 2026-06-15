@@ -11,8 +11,6 @@
         .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
         .card {background:#171717; border:1px solid #444; border-radius:16px; padding:18px; margin:12px 0;}
         .tab {padding:12px 20px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
-        .photo-card {background:#171717; border:1px solid #444; border-radius:16px; padding:12px; margin:12px 0;}
-        .photo {max-width:100%; border-radius:12px;}
     </style>
 </head>
 <body class="pb-20">
@@ -27,32 +25,21 @@
         <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">📈 AdamChoi</button>
     </div>
 
-    <div class="px-6 space-y-3">
+    <div class="px-6">
         <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
             📁 CARGAR NUEVO EXCEL
         </button>
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
-
-        <button onclick="document.getElementById('photoInput').click()" class="w-full bg-purple-600 hover:bg-purple-700 py-5 rounded-3xl font-bold">
-            📸 SUBIR FOTOS (se mostrarán abajo)
-        </button>
-        <input type="file" id="photoInput" accept="image/*" multiple class="hidden">
     </div>
 
-    <div class="px-6 text-center mb-6">
-        <button onclick="showConfig()" class="text-yellow-400 underline">⚙️ Configurar Groq API Key</button>
-    </div>
-
-    <div id="photosContainer" class="px-6"></div>
     <div id="sportTabs" class="flex flex-wrap gap-2 px-6 pb-4"></div>
     <div id="content" class="px-6"></div>
 
 <script>
 let allData = {};
 let currentSport = '';
-let groqKey = localStorage.getItem('groqKey') || '';
 
-// Cargar Excel guardado
+// Cargar datos guardados
 if (localStorage.getItem('pronosticosData')) {
     allData = JSON.parse(localStorage.getItem('pronosticosData'));
 }
@@ -73,6 +60,7 @@ window.switchSport = function(sport) {
     currentSport = sport;
     const data = allData[sport] || [];
     let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 capitalize">${sport}</h2>`;
+    
     data.forEach(p => {
         html += `
         <div class="card">
@@ -85,15 +73,17 @@ window.switchSport = function(sport) {
             </div>
         </div>`;
     });
+
     document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500 py-12">Sin datos</p>';
 };
 
+// Inicializar
 if (Object.keys(allData).length > 0) {
     renderTabs();
     window.switchSport(Object.keys(allData)[0]);
 }
 
-// Excel
+// Cargar Excel
 document.getElementById('fileInput').onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -115,36 +105,6 @@ document.getElementById('fileInput').onchange = e => {
     };
     reader.readAsBinaryString(file);
 };
-
-// Fotos (solo muestra por ahora)
-document.getElementById('photoInput').onchange = e => {
-    const files = e.target.files;
-    const container = document.getElementById('photosContainer');
-
-    Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = ev => {
-            const div = document.createElement('div');
-            div.className = 'photo-card';
-            div.innerHTML = `
-                <img src="${ev.target.result}" class="photo">
-                <p class="text-yellow-400 mt-2">📸 Foto subida</p>
-                <p class="text-xs text-zinc-400">El análisis completo con IA se agregará pronto</p>
-            `;
-            container.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-};
-
-function showConfig() {
-    const key = prompt("Ingresa tu Groq API Key (gsk_...):", groqKey);
-    if (key) {
-        groqKey = key.trim();
-        localStorage.setItem('groqKey', groqKey);
-        alert("✅ Clave guardada");
-    }
-}
 </script>
 </body>
 </html>
