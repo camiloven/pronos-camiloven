@@ -10,7 +10,7 @@
         body {background:#09090b; color:white; font-family:system-ui,sans-serif; margin:0;}
         .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
         .card {background:#171717; border:1px solid #444; border-radius:16px; padding:18px; margin:12px 0;}
-        .tab {padding:10px 20px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin-right:8px;}
+        .tab {padding:12px 20px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
     </style>
 </head>
 <body class="pb-20">
@@ -26,13 +26,14 @@
     </div>
 
     <div class="px-6">
-        <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
+        <button onclick="document.getElementById('fileInput').click()" 
+                class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
             📁 CARGAR NUEVO EXCEL
         </button>
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
     </div>
 
-    <div id="sportTabs" class="flex gap-2 px-6 overflow-x-auto pb-4"></div>
+    <div id="sportTabs" class="flex flex-wrap gap-2 px-6 pb-4"></div>
 
     <div id="content" class="px-6"></div>
 
@@ -40,28 +41,28 @@
 let allData = {};
 let currentSport = '';
 
-// Cargar datos guardados al abrir la página
-const saved = localStorage.getItem('pronosticosData');
-if (saved) {
-    allData = JSON.parse(saved);
-    renderTabs();
-    if (Object.keys(allData).length > 0) switchSport(Object.keys(allData)[0]);
+// Cargar datos guardados
+if (localStorage.getItem('pronosticosData')) {
+    allData = JSON.parse(localStorage.getItem('pronosticosData'));
 }
 
 function renderTabs() {
-    let html = '';
+    const container = document.getElementById('sportTabs');
+    container.innerHTML = '';
     Object.keys(allData).forEach(sport => {
-        const active = currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800';
-        html += `<button onclick="switchSport('${sport}')" class="tab \( {active}"> \){sport}</button>`;
+        const btn = document.createElement('button');
+        btn.textContent = sport;
+        btn.className = `tab ${currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
+        btn.onclick = () => switchSport(sport);
+        container.appendChild(btn);
     });
-    document.getElementById('sportTabs').innerHTML = html;
 }
 
 window.switchSport = function(sport) {
     currentSport = sport;
     const data = allData[sport] || [];
     let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 capitalize">${sport}</h2>`;
-    
+
     data.forEach(p => {
         html += `
         <div class="card">
@@ -83,12 +84,17 @@ window.switchSport = function(sport) {
                     <div style="font-size:11px">VISITA</div>
                 </div>
             </div>
-            ${p['o_2.5'] !== undefined ? `<div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">Over 2.5: ${Math.round(p['o_2.5']*100)}%</div>` : ''}
         </div>`;
     });
 
-    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos</p>';
+    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500 py-12">Sin datos en esta hoja</p>';
 };
+
+// Cargar al iniciar
+if (Object.keys(allData).length > 0) {
+    renderTabs();
+    switchSport(Object.keys(allData)[0]);
+}
 
 document.getElementById('fileInput').onchange = e => {
     const file = e.target.files[0];
@@ -100,15 +106,15 @@ document.getElementById('fileInput').onchange = e => {
             const wb = XLSX.read(ev.target.result, {type:'binary'});
             allData = {};
             wb.SheetNames.forEach(name => {
-                const data = XLSX.utils.sheet_to_json(wb.Sheets[name]);
-                if (data.length > 0) allData[name] = data;
+                const sheetData = XLSX.utils.sheet_to_json(wb.Sheets[name]);
+                if (sheetData.length > 0) allData[name] = sheetData;
             });
 
             localStorage.setItem('pronosticosData', JSON.stringify(allData));
             renderTabs();
-            if (Object.keys(allData).length > 0) switchSport(Object.keys(allData)[0]);
+            switchSport(Object.keys(allData)[0]);
         } catch(err) {
-            alert('Error al leer el archivo');
+            alert('Error leyendo el Excel');
         }
     };
     reader.readAsBinaryString(file);
