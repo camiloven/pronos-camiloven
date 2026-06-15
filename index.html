@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronos Camiloven</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {background:#09090b; color:white; font-family:sans-serif; margin:0;}
+        .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
+        .card {background:#171717; border:1px solid #444; border-radius:16px; padding:20px; margin:12px 0;}
+    </style>
+</head>
+<body>
+    <div class="p-6 text-center border-b border-yellow-500">
+        <h1 class="text-5xl font-bold neon text-yellow-400">PRONOS CAMILOVEN</h1>
+        <p class="text-yellow-400">by camiloven</p>
+    </div>
+
+    <div class="p-6">
+        <button onclick="document.getElementById('fileInput').click()" 
+                class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
+            📁 CARGAR EXCEL
+        </button>
+        <input type="file" id="fileInput" accept=".xlsx" class="hidden">
+    </div>
+
+    <div id="content" class="p-6"></div>
+
+<script>
+document.getElementById('fileInput').onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const wb = XLSX.read(ev.target.result, {type:'binary'});
+            const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+
+            let html = '';
+            data.forEach(p => {
+                html += `
+                <div class="card">
+                    <div style="color:#eab308">${p.date || ''}</div>
+                    <div style="font-size:19px;font-weight:bold;margin:12px 0">
+                        ${p.home} vs ${p.away}
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:#111;padding:16px;border-radius:12px">
+                        <div style="text-align:center">
+                            <div style="color:#4ade80;font-size:22px">${Math.round((p['1x2_h']||0)*100)}%</div>
+                            <div style="font-size:11px">LOCAL</div>
+                        </div>
+                        <div style="text-align:center">
+                            <div style="color:#fcd34d;font-size:22px">${Math.round((p['1x2_d']||0)*100)}%</div>
+                            <div style="font-size:11px">EMPATE</div>
+                        </div>
+                        <div style="text-align:center">
+                            <div style="color:#f87171;font-size:22px">${Math.round((p['1x2_a']||0)*100)}%</div>
+                            <div style="font-size:11px">VISITA</div>
+                        </div>
+                    </div>
+                    <div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">
+                        Over 2.5: ${Math.round((p['o_2.5']||0)*100)}%
+                    </div>
+                </div>`;
+            });
+            document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">No hay datos</p>';
+        } catch(err) {
+            alert('Error al leer el archivo');
+        }
+    };
+    reader.readAsBinaryString(file);
+};
+</script>
+</body>
+</html>
