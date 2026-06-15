@@ -7,27 +7,28 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body {background:#0a0a0a; color:#e5e5e5; font-family:system-ui,sans-serif; margin:0;}
-        .neon {text-shadow:0 0 20px #eab308;}
-        .card {background:#121212; border-radius:20px; padding:20px; margin:16px 0; border:1px solid #333;}
-        .prob {font-size:28px; font-weight:bold;}
+        body {background:#09090b; color:white; font-family:system-ui,sans-serif; margin:0;}
+        .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
+        .card {background:linear-gradient(145deg, #1f1f23, #141417); border:1px solid #3a3a3f; border-radius:24px; padding:22px; margin:16px 0;}
+        .prob {font-size:32px; font-weight:800;}
+        .tab {padding:12px 24px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
     </style>
 </head>
-<body class="pb-24">
-    <div class="bg-gradient-to-r from-yellow-500 to-amber-500 text-black p-6 text-center">
-        <h1 class="text-4xl font-bold neon">PRONOS CAMILOVEN</h1>
-        <p class="text-sm">High Probability Picks</p>
+<body class="pb-20">
+    <div class="p-6 text-center border-b border-yellow-500">
+        <h1 class="text-5xl font-bold neon text-yellow-400">PRONOS CAMILOVEN</h1>
+        <p class="text-yellow-400">by camiloven • Detailed Stats</p>
     </div>
 
     <div class="grid grid-cols-3 gap-3 p-6">
-        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-900 p-4 rounded-2xl text-center">Betmines</button>
-        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-900 p-4 rounded-2xl text-center">Forebet</button>
-        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-900 p-4 rounded-2xl text-center">AdamChoi</button>
+        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">⛏️ Betmines</button>
+        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">📊 Forebet</button>
+        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center">📈 AdamChoi</button>
     </div>
 
     <div class="px-6">
         <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
-            📁 CARGAR EXCEL
+            📁 CARGAR NUEVO EXCEL
         </button>
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
     </div>
@@ -48,8 +49,8 @@ function renderTabs() {
     container.innerHTML = '';
     Object.keys(allData).forEach(sport => {
         const btn = document.createElement('button');
-        btn.textContent = sport.toUpperCase();
-        btn.className = `px-5 py-3 rounded-full font-bold ${currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800'}`;
+        btn.textContent = sport;
+        btn.className = `tab px-6 py-3 rounded-full font-bold ${currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
         btn.onclick = () => window.switchSport(sport);
         container.appendChild(btn);
     });
@@ -58,38 +59,49 @@ function renderTabs() {
 window.switchSport = function(sport) {
     currentSport = sport;
     const data = allData[sport] || [];
-    let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 px-2">${sport.toUpperCase()}</h2>`;
+    let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 capitalize px-2">${sport}</h2>`;
 
     data.forEach(p => {
         const h = Math.round((p['1x2_h']||0)*100);
         const d = Math.round((p['1x2_d']||0)*100);
         const a = Math.round((p['1x2_a']||0)*100);
-        
+
+        let ouHTML = '';
+        const overs = [1.5, 2.5, 3.5];
+        overs.forEach(th => {
+            if (p[`o_${th}`] !== undefined) {
+                ouHTML += `<div class="flex justify-between py-1"><span class="text-green-400">Over \( {th}</span><span class="font-bold"> \){Math.round(p[`o_${th}`]*100)}%</span></div>`;
+            }
+            if (p[`u_${th}`] !== undefined) {
+                ouHTML += `<div class="flex justify-between py-1"><span class="text-red-400">Under \( {th}</span><span class="font-bold"> \){Math.round(p[`u_${th}`]*100)}%</span></div>`;
+            }
+        });
+
         html += `
         <div class="card">
             <div class="text-amber-400 text-sm">${p.date || ''}</div>
-            <div class="font-bold text-lg mt-2">${p.home} vs ${p.away}</div>
+            <div class="font-bold text-xl mt-2">${p.home} <span class="text-gray-500">vs</span> ${p.away}</div>
             
-            <div class="grid grid-cols-3 gap-4 mt-6">
+            <div class="grid grid-cols-3 gap-6 mt-8 bg-zinc-900/70 rounded-2xl p-6">
                 <div class="text-center">
                     <div class="prob text-green-400">${h}%</div>
-                    <div class="text-xs text-gray-400">LOCAL</div>
+                    <div class="text-xs text-gray-400 mt-1">LOCAL</div>
                 </div>
                 <div class="text-center">
                     <div class="prob text-yellow-400">${d}%</div>
-                    <div class="text-xs text-gray-400">EMPATE</div>
+                    <div class="text-xs text-gray-400 mt-1">EMPATE</div>
                 </div>
                 <div class="text-center">
                     <div class="prob text-red-400">${a}%</div>
-                    <div class="text-xs text-gray-400">VISITA</div>
+                    <div class="text-xs text-gray-400 mt-1">VISITA</div>
                 </div>
             </div>
-            
-            ${p['o_2.5'] ? `<div class="text-center mt-5 text-green-400 font-bold">Over 2.5 • ${Math.round(p['o_2.5']*100)}%</div>` : ''}
+
+            \( {ouHTML ? `<div class="mt-6 bg-zinc-900 rounded-2xl p-5 text-sm"> \){ouHTML}</div>` : ''}
         </div>`;
     });
 
-    document.getElementById('content').innerHTML = html || '<p class="text-center py-20 text-gray-500">Sin datos</p>';
+    document.getElementById('content').innerHTML = html || '<p class="text-center py-20 text-gray-500">Carga tu Excel</p>';
 };
 
 if (Object.keys(allData).length > 0) {
@@ -113,7 +125,7 @@ document.getElementById('fileInput').onchange = e => {
             renderTabs();
             window.switchSport(Object.keys(allData)[0]);
         } catch(err) {
-            alert('Error al leer el Excel');
+            alert('Error leyendo el Excel');
         }
     };
     reader.readAsBinaryString(file);
