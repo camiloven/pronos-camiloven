@@ -10,7 +10,7 @@
         body {background:#09090b; color:white; font-family:system-ui,sans-serif; margin:0;}
         .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
         .card {background:#171717; border:1px solid #444; border-radius:16px; padding:18px; margin:12px 0;}
-        .tab {padding:10px 18px; border-radius:9999px; font-weight:bold; white-space:nowrap;}
+        .tab {padding:10px 20px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin-right:8px;}
     </style>
 </head>
 <body class="pb-20">
@@ -57,10 +57,11 @@ document.getElementById('fileInput').onchange = e => {
                 if (data.length > 0) allData[name] = data;
             });
 
-            // Crear tabs
+            // Crear tabs correctamente
             let tabsHTML = '';
             Object.keys(allData).forEach(sport => {
-                tabsHTML += `<button onclick="switchSport('${sport}')" class="tab \( {currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}"> \){sport}</button>`;
+                const active = currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white';
+                tabsHTML += `<button onclick="switchSport('${sport}')" class="tab \( {active}"> \){sport}</button>`;
             });
             document.getElementById('sportTabs').innerHTML = tabsHTML;
 
@@ -100,7 +101,7 @@ window.switchSport = function(sport) {
                     <div style="font-size:11px">VISITA</div>
                 </div>
             </div>
-            ${p['o_2.5'] ? `<div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">Over 2.5: ${Math.round(p['o_2.5']*100)}%</div>` : ''}
+            ${p['o_2.5'] !== undefined ? `<div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">Over 2.5: ${Math.round(p['o_2.5']*100)}%</div>` : ''}
         </div>`;
     });
 
