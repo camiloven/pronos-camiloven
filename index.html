@@ -7,18 +7,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body {background:#09090b; color:white; font-family:sans-serif; margin:0;}
+        body {background:#09090b; color:white; font-family:system-ui,sans-serif; margin:0;}
         .neon {text-shadow:0 0 30px #eab308,0 0 60px #eab308;}
-        .card {background:#171717; border:1px solid #444; border-radius:16px; padding:20px; margin:12px 0;}
+        .card {background:#171717; border:1px solid #444; border-radius:16px; padding:18px; margin:12px 0;}
+        .tab {padding:10px 18px; border-radius:9999px; font-weight:bold; white-space:nowrap;}
     </style>
 </head>
-<body>
+<body class="pb-20">
     <div class="p-6 text-center border-b border-yellow-500">
         <h1 class="text-5xl font-bold neon text-yellow-400">PRONOS CAMILOVEN</h1>
         <p class="text-yellow-400">by camiloven</p>
     </div>
 
-    <div class="p-6">
+    <!-- Botones Fuentes -->
+    <div class="grid grid-cols-3 gap-3 p-6">
+        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">⛏️ Betmines</button>
+        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">📊 Forebet</button>
+        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl text-center text-sm">📈 AdamChoi</button>
+    </div>
+
+    <div class="px-6">
         <button onclick="document.getElementById('fileInput').click()" 
                 class="w-full bg-yellow-400 text-black py-6 rounded-3xl font-bold text-xl">
             📁 CARGAR EXCEL
@@ -26,9 +34,15 @@
         <input type="file" id="fileInput" accept=".xlsx" class="hidden">
     </div>
 
-    <div id="content" class="p-6"></div>
+    <!-- Tabs Deportes -->
+    <div id="sportTabs" class="flex gap-2 px-6 overflow-x-auto pb-4"></div>
+
+    <div id="content" class="px-6"></div>
 
 <script>
+let allData = {};
+let currentSport = '';
+
 document.getElementById('fileInput').onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -37,41 +51,60 @@ document.getElementById('fileInput').onchange = e => {
     reader.onload = ev => {
         try {
             const wb = XLSX.read(ev.target.result, {type:'binary'});
-            const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-
-            let html = '';
-            data.forEach(p => {
-                html += `
-                <div class="card">
-                    <div style="color:#eab308">${p.date || ''}</div>
-                    <div style="font-size:19px;font-weight:bold;margin:12px 0">
-                        ${p.home} vs ${p.away}
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:#111;padding:16px;border-radius:12px">
-                        <div style="text-align:center">
-                            <div style="color:#4ade80;font-size:22px">${Math.round((p['1x2_h']||0)*100)}%</div>
-                            <div style="font-size:11px">LOCAL</div>
-                        </div>
-                        <div style="text-align:center">
-                            <div style="color:#fcd34d;font-size:22px">${Math.round((p['1x2_d']||0)*100)}%</div>
-                            <div style="font-size:11px">EMPATE</div>
-                        </div>
-                        <div style="text-align:center">
-                            <div style="color:#f87171;font-size:22px">${Math.round((p['1x2_a']||0)*100)}%</div>
-                            <div style="font-size:11px">VISITA</div>
-                        </div>
-                    </div>
-                    <div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">
-                        Over 2.5: ${Math.round((p['o_2.5']||0)*100)}%
-                    </div>
-                </div>`;
+            allData = {};
+            wb.SheetNames.forEach(name => {
+                const data = XLSX.utils.sheet_to_json(wb.Sheets[name]);
+                if (data.length > 0) allData[name] = data;
             });
-            document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">No hay datos</p>';
+
+            // Crear tabs
+            let tabsHTML = '';
+            Object.keys(allData).forEach(sport => {
+                tabsHTML += `<button onclick="switchSport('${sport}')" class="tab \( {currentSport === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}"> \){sport}</button>`;
+            });
+            document.getElementById('sportTabs').innerHTML = tabsHTML;
+
+            if (Object.keys(allData).length > 0) {
+                switchSport(Object.keys(allData)[0]);
+            }
         } catch(err) {
             alert('Error al leer el archivo');
         }
     };
     reader.readAsBinaryString(file);
+};
+
+window.switchSport = function(sport) {
+    currentSport = sport;
+    const data = allData[sport] || [];
+    let html = `<h2 class="text-yellow-400 text-2xl font-bold mb-6 capitalize">${sport}</h2>`;
+    
+    data.forEach(p => {
+        html += `
+        <div class="card">
+            <div style="color:#eab308;font-size:14px">${p.date || ''}</div>
+            <div style="font-size:19px;font-weight:bold;margin:12px 0">
+                ${p.home || '?'} <span style="color:#666">vs</span> ${p.away || '?'}
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:#111;padding:16px;border-radius:12px">
+                <div style="text-align:center">
+                    <div style="color:#4ade80;font-size:22px">${Math.round((p['1x2_h']||0)*100)}%</div>
+                    <div style="font-size:11px">LOCAL</div>
+                </div>
+                <div style="text-align:center">
+                    <div style="color:#fcd34d;font-size:22px">${Math.round((p['1x2_d']||0)*100)}%</div>
+                    <div style="font-size:11px">EMPATE</div>
+                </div>
+                <div style="text-align:center">
+                    <div style="color:#f87171;font-size:22px">${Math.round((p['1x2_a']||0)*100)}%</div>
+                    <div style="font-size:11px">VISITA</div>
+                </div>
+            </div>
+            ${p['o_2.5'] ? `<div style="text-align:center;margin-top:12px;color:#4ade80;font-weight:bold">Over 2.5: ${Math.round(p['o_2.5']*100)}%</div>` : ''}
+        </div>`;
+    });
+
+    document.getElementById('content').innerHTML = html || '<p class="text-center text-gray-500">Sin datos en esta hoja</p>';
 };
 </script>
 </body>
