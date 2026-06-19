@@ -5,23 +5,26 @@
    - Captura 4: Partidos de Argentina - Reserve League.
    - Captura 5: Partidos de Brasil - Baiano 2, Brasil - Cearense U20, Republica de Irlanda - Premier Division.
    - Captura 6: Partidos de Mundo - World Cup, Republica de Irlanda - Premier Division, Islandia - Inkasso-Deildin, Estados Unidos - USL League Two, Ecuador - Superliga Femenina.
-   - Captura 7: Partidos de México vs. Corea del Sur, Australia vs. Escocia, Marruecos vs. Brasil, Haití vs. Turquía, Paraguay vs. un equipo no especificado, y varios partidos de la liga irlandesa.
+   - Captura 7: Partidos de la Copa del Mundo (México vs. Corea del Sur, Australia vs. Escocia, Marruecos vs. Brasil, Haití vs. Turquía, Paraguay vs. un equipo no especificado), y partidos de la Premier League de Irlanda (St. Patrick's Dublin vs. Sligo Rovers, Shelbourne FC vs. Drogheda Utd, Waterford United vs. Shamrock Rovers, Galway United vs. Derry City).
 
 2. **Análisis Consolidado de Forma y Rendimiento**:
-   - La mayoría de los partidos provienen de ligas y torneos de menor nivel o de categorías inferiores, lo que puede indicar una mayor incertidumbre en los resultados.
-   - Algunos equipos como Shamrock Rovers, Derry City, y Waterford United de la liga irlandesa parecen tener una buena forma, considerando sus probabilidades y los resultados recientes.
-   - En la Captura 7, se observan resultados de partidos internacionales, donde equipos como México, Australia, y Marruecos tienen probabilidades favorables en sus respectivos encuentros.
+   - La mayoría de los partidos provienen de ligas y torneos de menor nivel, como ligas nacionales de países con menor tradición futbolística o divisiones inferiores de ligas más prominentes.
+   - Los partidos de la Copa del Mundo ofrecen una perspectiva interesante, ya que involucran a selecciones nacionales de diferentes niveles.
+   - La variedad de ligas y torneos dificulta un análisis generalizado, pero se puede observar que algunos equipos tienen una clara ventaja en términos de cuotas y probabilidades, lo que sugiere una diferencia significativa en su nivel de juego o forma actual.
 
 3. **Probabilidades Calculadas por Partido**:
-   - **México vs. Corea del Sur**: Gana México (1.60), Empate (3.30), Gana Corea del Sur (5.00). Over 2.5 (2.10), BTTS (1.80).
-   - **Australia vs. Escocia**: Gana Australia (1.60), Empate (3.60), Gana Escocia (3.70). Over 2.5 (2.20), BTTS (1.90).
-   - **Marruecos vs. Brasil**: Gana Marruecos (4.20), Empate (3.30), Gana Brasil (1.70). Over 2.5 (2.50), BTTS (2.00).
-   - **Shamrock Rovers vs. Waterford United**: Gana Shamrock Rovers (1.60), Empate (3.70), Gana Waterford United (4.50). Over 2.5 (2.10), BTTS (1.80).
-   - **Derry City vs. Galway United**: Gana Derry City (1.80), Empate (3.30), Gana Galway United (3.70). Over 2.5 (2.20), BTTS (1.90).
+   - **México vs. Corea del Sur**: Gana México (1.60), Empate (3.60), Gana Corea del Sur (5.00)
+   - **Australia vs. Escocia**: Gana Australia (1.60), Empate (3.70), Gana Escocia (5.00)
+   - **Marruecos vs. Brasil**: Gana Marruecos (2.10), Empate (3.30), Gana Brasil (3.20)
+   - **Haití vs. Turquía**: Gana Haití (4.00), Empate (3.20), Gana Turquía (1.80)
+   - **Paraguay vs. [Equipo no especificado]**: No se pueden calcular probabilidades sin el nombre del equipo contrario.
+   - **St. Patrick's Dublin vs. Sligo Rovers**: Gana St. Patrick's (1.25), Empate (5.25), Gana Sligo Rovers (9.00)
+   - **Shelbourne FC vs. Drogheda Utd**: Gana Shelbourne (1.60), Empate (3.75), Gana Drogheda Utd (5.50)
+   - **Waterford United vs. Shamrock Rovers**: Gana Waterford (4.75), Empate (3.50), Gana Shamrock Rovers (1.65)
+   - **Galway United vs. Derry City**: Gana Galway (2.70), Empate (3.20), Gana Derry City (2.45)
 
 4. **Conclusión y Recomendaciones Premium de Apuesta**:
-   - Se recomienda apostar por el triunfo de México en su partido contra Corea del Sur, considerando su forma y las probabilidades favorables.
-   - En el encuentro entre Australia y Escocia, una apuesta por el empate podría ser una buena opción, dado el equilibrio entre ambos equipos.
-   - Para el partido de Shamrock Rovers vs. Waterford United, se sugiere apostar por la victoria de Shamrock Rovers, ya que tienen una buena forma y ventaja en casa.
-   - En el partido de Derry City vs. Galway United, una apuesta por el over 2.5 goles podría ser una buena opción, considerando el estilo de juego ofensivo de ambos equipos.
-   - Es importante recordar que las apuestas deben hacerse de manera responsable y considerando siempre el riesgo involucrado.
+   - Dada la diversidad de partidos y ligas, es crucial analizar cada encuentro individualmente, considerando la forma actual de los equipos, lesiones, suspensiones, y otros factores que puedan influir en el resultado.
+   - Para partidos de la Copa del Mundo, considerar la experiencia y el nivel de los equipos en competiciones internacionales.
+   - En ligas nacionales y divisiones inferiores, la ventaja del equipo local puede ser significativa, pero también es importante considerar la motivación y el objetivo de cada equipo en la competición.
+   - Recomendamos apostar con moderación y diversificar las apuestas para minimizar el riesgo, considerando siempre las probabilidades y el valor de cada apuesta.
