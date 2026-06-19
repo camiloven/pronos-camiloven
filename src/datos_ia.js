@@ -1,34 +1,35 @@
-export const prediccionesIA = `1. **Resumen de Datos Extraídos**: Se han extraído datos de varios partidos de fútbol de diferentes ligas y torneos, incluyendo la FA Cup de China, la liga de Nueva Zelanda, la liga de Australia, la liga de Irlanda, la liga de Argentina, la liga de Brasil, la Copa Mundial y otros torneos. Los datos incluyen los nombres de los equipos, las fechas y horas de los partidos, los resultados y las cuotas de apuestas.
+export const prediccionesIA = `1. **Resumen de Datos Extraídos**: 
+   - Se han extraído datos de 7 capturas de pantalla diferentes, que incluyen partidos de fútbol de varias ligas y torneos alrededor del mundo, como la FA Cup de China, la liga de Nueva Zelanda, la liga de Australia, la liga de Irlanda, la liga de Brasil, la Copa Mundial, y partidos de la liga de Estados Unidos, entre otros.
+   - Los datos incluyen los nombres de los equipos, las fechas y horas de los partidos, los resultados de los partidos (si ya se han jugado), y las probabilidades de apuesta para cada partido, como la victoria del equipo local, el empate, la victoria del equipo visitante, el sobre 2.5 goles, y ambos equipos anotan (BTTS).
 
-2. **Análisis Consolidado de Forma y Rendimiento**: 
-   - **Nueva Zelanda - National League**: Auckland tiene una buena forma, con una cuota de 1.18 para ganar.
-   - **China - FA Cup**: Qingdao West Coast y Shanxi Chongde Ronghai tienen cuotas competitivas.
-   - **Australia - Victoria NPL Youth**: Melbourne City FC U23 y Oakleigh Cannons U23 tienen partidos programados.
-   - **Australia - New South Wales NPL 3**: Sydney University y Stanmore Hawks tienen cuotas favorables.
-   - **Argentina - Reserve League**: Estudiantes La Plata Res y Central Cérdoba SAE Res. tienen un partido programado.
-   - **Irlanda - Premier Division**: Shamrock Rovers y Waterford United tienen cuotas competitivas.
-   - **Brasil - Baiano 2 y Cearense U20**: No hay cuotas disponibles para estos partidos.
-   - **Copa Mundial**: Estados Unidos, Australia, Escocia y Brasil tienen partidos programados con cuotas variadas.
+2. **Análisis Consolidado de Forma y Rendimiento**:
+   - **Nueva Zelanda - National League**: Auckland tiene una buena forma, con una cotización de 1.18 para ganar.
+   - **China - FA Cup**: Qingdao West Coast y Shanxi Chongde Ronghai tienen partidos programados, con Qingdao West Coast como favorito.
+   - **Australia - Victoria NPL Youth**: Melbourne City FC U23 y Oakleigh Cannons U23 se enfrentan, con Melbourne City FC U23 como favorito.
+   - **Irlanda - Premier Division**: Shamrock Rovers es uno de los favoritos para ganar su partido, con una cotización de 1.60.
+   - **Brasil - Baiano 2 y Cearense U20**: No hay datos suficientes para un análisis detallado.
+   - **Copa Mundial**: Estados Unidos y Australia se enfrentan, con Estados Unidos como favorito, con una cotización de 1.60.
+   - **Partidos de la liga de Irlanda**: St Patrick's, Sligo Rovers, Waterford United, Shamrock Rovers, Galway United, y Derry City tienen partidos programados, con diferentes favoritos y cotizaciones.
 
 3. **Probabilidades Calculadas por Partido**:
    - **Gana Local/Empate/Visitante**:
-     - Nueva Zelanda - National League: Auckland (60%), Western Springs (20%), Empate (20%).
-     - China - FA Cup: Qingdao West Coast (40%), Shanxi Chongde Ronghai (30%), Empate (30%).
-     - Australia - Victoria NPL Youth: Melbourne City FC U23 (50%), Oakleigh Cannons U23 (30%), Empate (20%).
-     - Copa Mundial: Estados Unidos (55%), Australia (25%), Empate (20%).
+     - Nueva Zelanda - National League: Auckland (1.18) vs. Western Springs, favorito local.
+     - China - FA Cup: Qingdao West Coast (1.25) vs. Shanxi Chongde Ronghai, favorito local.
+     - Australia - Victoria NPL Youth: Melbourne City FC U23 (no disponible) vs. Oakleigh Cannons U23, favorito local.
+     - Irlanda - Premier Division: Shamrock Rovers (1.60) vs. Waterford United, favorito local.
+     - Copa Mundial: Estados Unidos (1.60) vs. Australia, favorito local.
    - **Over 2.5**:
-     - Nueva Zelanda - National League: 40%.
-     - China - FA Cup: 35%.
-     - Australia - Victoria NPL Youth: 45%.
-     - Copa Mundial: 50%.
-   - **BTTS (Ambos Equipos Marcan)**:
-     - Nueva Zelanda - National League: 50%.
-     - China - FA Cup: 45%.
-     - Australia - Victoria NPL Youth: 55%.
-     - Copa Mundial: 60%.
+     - La mayoría de los partidos tienen probabilidades que sugieren un sobre 2.5 goles, especialmente en partidos con equipos con alta potencia ofensiva.
+   - **BTTS (Both Teams To Score)**:
+     - La mayoría de los partidos tienen probabilidades que sugieren que ambos equipos anotarán, especialmente en partidos con equipos con buena forma ofensiva.
 
 4. **Conclusión y Recomendaciones Premium de Apuesta**:
-   - Se recomienda apostar por Auckland en la liga de Nueva Zelanda debido a su buena forma.
-   - En la FA Cup de China, Qingdao West Coast y Shanxi Chongde Ronghai tienen cuotas competitivas, lo que sugiere un partido equilibrado.
-   - En la Copa Mundial, Estados Unidos y Brasil tienen cuotas favorables, pero es importante considerar la forma y el rendimiento reciente de cada equipo antes de realizar una apuesta.
-   - Es importante recordar que las apuestas deben realizarse de manera responsable y dentro de los límites de cada persona.`;
+   - **Recomendaciones**:
+     - Apostar por la victoria de Auckland en la liga de Nueva Zelanda.
+     - Apostar por la victoria de Qingdao West Coast en la FA Cup de China.
+     - Apostar por la victoria de Melbourne City FC U23 en la liga de Australia.
+     - Apostar por la victoria de Shamrock Rovers en la liga de Irlanda.
+     - Apostar por la victoria de Estados Unidos en la Copa Mundial.
+     - Apostar por el sobre 2.5 goles en partidos con equipos con alta potencia ofensiva.
+     - Apostar por ambos equipos anotar en partidos con equipos con buena forma ofensiva.
+   - **Conclusión**: Es importante tener en cuenta que las probabilidades y los resultados pueden cambiar, y es fundamental investigar y analizar los partidos antes de hacer cualquier apuesta. Además, es importante apostar de manera responsable y dentro de los límites de tu presupuesto.`;
