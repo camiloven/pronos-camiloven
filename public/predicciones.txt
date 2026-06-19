@@ -1,0 +1,27 @@
+1. **Resumen de Datos Extraídos**:
+   - Captura 1: Partidos de Nueva Zelanda - National League, El RP China - FA Cup, Australia - Victoria NPL Youth.
+   - Captura 2: Partidos de Australia - Victoria Premier League 2, Australia - New South Wales NPL 3, El RP China - League Two.
+   - Captura 3: Partidos de El RP China - FA Cup, El RP China - League Two, Kazajstan - First Division.
+   - Captura 4: Partidos de Argentina - Reserve League.
+   - Captura 5: Partidos de Brasil - Baiano 2, Brasil - Cearense U20, Republica de Irlanda - Premier Division.
+   - Captura 6: Partidos de Mundo - World Cup, Republica de Irlanda - Premier Division, Islandia - Inkasso-Deildin, Estados Unidos - USL League Two, Ecuador - Superliga Femenina.
+   - Captura 7: Partidos de México vs. Corea del Sur, Australia vs. Escocia, Marruecos vs. Brasil, Haití vs. Turquía, Paraguay vs. un equipo no especificado, y varios partidos de la liga irlandesa.
+
+2. **Análisis Consolidado de Forma y Rendimiento**:
+   - La mayoría de los partidos provienen de ligas y torneos de menor nivel o de categorías inferiores, lo que puede indicar una mayor incertidumbre en los resultados.
+   - Algunos equipos como Shamrock Rovers, Derry City, y Waterford United de la liga irlandesa parecen tener una buena forma, considerando sus probabilidades y los resultados recientes.
+   - En la Captura 7, se observan resultados de partidos internacionales, donde equipos como México, Australia, y Marruecos tienen probabilidades favorables en sus respectivos encuentros.
+
+3. **Probabilidades Calculadas por Partido**:
+   - **México vs. Corea del Sur**: Gana México (1.60), Empate (3.30), Gana Corea del Sur (5.00). Over 2.5 (2.10), BTTS (1.80).
+   - **Australia vs. Escocia**: Gana Australia (1.60), Empate (3.60), Gana Escocia (3.70). Over 2.5 (2.20), BTTS (1.90).
+   - **Marruecos vs. Brasil**: Gana Marruecos (4.20), Empate (3.30), Gana Brasil (1.70). Over 2.5 (2.50), BTTS (2.00).
+   - **Shamrock Rovers vs. Waterford United**: Gana Shamrock Rovers (1.60), Empate (3.70), Gana Waterford United (4.50). Over 2.5 (2.10), BTTS (1.80).
+   - **Derry City vs. Galway United**: Gana Derry City (1.80), Empate (3.30), Gana Galway United (3.70). Over 2.5 (2.20), BTTS (1.90).
+
+4. **Conclusión y Recomendaciones Premium de Apuesta**:
+   - Se recomienda apostar por el triunfo de México en su partido contra Corea del Sur, considerando su forma y las probabilidades favorables.
+   - En el encuentro entre Australia y Escocia, una apuesta por el empate podría ser una buena opción, dado el equilibrio entre ambos equipos.
+   - Para el partido de Shamrock Rovers vs. Waterford United, se sugiere apostar por la victoria de Shamrock Rovers, ya que tienen una buena forma y ventaja en casa.
+   - En el partido de Derry City vs. Galway United, una apuesta por el over 2.5 goles podría ser una buena opción, considerando el estilo de juego ofensivo de ambos equipos.
+   - Es importante recordar que las apuestas deben hacerse de manera responsable y considerando siempre el riesgo involucrado.
