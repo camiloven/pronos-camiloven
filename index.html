@@ -469,19 +469,17 @@ function mostrarDeporte() {
         let ouHTML = '';
         const thresholds = [1.5, 2.5, 3.5];
         thresholds.forEach(th => {
-            const fmt = (k, col, thTxt) => {
+            const fmt = (k, barCol, txtCol, thTxt) => {
                 const val = Math.round(p[k] * 100);
                 const resaltar = esMejor(k);
-                return `<div class="flex items-center justify-between py-1.5 text-sm gap-3 ${resaltar ? 'text-amber-300 font-bold' : ''}">
-                    <span class="text-gray-400">${thTxt} ${th}</span>
-                    <span class="flex items-center gap-2">
-                        <span class="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden"><span class="block h-full rounded-full ${col}" style="width:${Math.max(val, 2)}%"></span></span>
-                        <span class="${col} font-bold w-10 text-right">${val}%</span>
-                    </span>
+                return `<div class="flex items-center justify-between py-2 text-sm gap-3 ${resaltar ? 'text-amber-300 font-bold' : ''}">
+                    <span class="text-gray-400 shrink-0">${thTxt} ${th}</span>
+                    <span class="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden"><span class="block h-full rounded-full ${barCol}" style="width:${Math.max(val, 2)}%"></span></span>
+                    <span class="${txtCol} font-black text-base w-12 text-right shrink-0">${val}%</span>
                 </div>`;
             };
-            if (p['o_' + th] !== undefined && p['o_' + th] > 0) ouHTML += fmt('o_' + th, 'bg-emerald-400 text-emerald-400', 'Over');
-            if (p['u_' + th] !== undefined && p['u_' + th] > 0) ouHTML += fmt('u_' + th, 'bg-rose-400 text-rose-400', 'Under');
+            if (p['o_' + th] !== undefined && p['o_' + th] > 0) ouHTML += fmt('o_' + th, 'bg-emerald-400', 'text-emerald-400', 'Over');
+            if (p['u_' + th] !== undefined && p['u_' + th] > 0) ouHTML += fmt('u_' + th, 'bg-rose-400', 'text-rose-400', 'Under');
         });
 
         const badge = p._deporte
