@@ -280,9 +280,12 @@ function iconoDeporte(nombre) {
     return 'ti-trophy';
 }
 
-if (localStorage.getItem('pronosticosData')) {
+const KEY_DATOS = 'pronosticosDataV2';
+localStorage.removeItem('pronosticosData');
+
+if (localStorage.getItem(KEY_DATOS)) {
     try {
-        allData = JSON.parse(localStorage.getItem('pronosticosData'));
+        allData = JSON.parse(localStorage.getItem(KEY_DATOS));
         Object.values(allData).forEach(ordenarPorHora);
     } catch (e) {
         allData = {};
@@ -302,9 +305,21 @@ function limpiarNumero(v) {
 function normalizarClaves(fila) {
     const norm = {};
     Object.keys(fila).forEach(k => {
-        norm[String(k).toLowerCase().trim().replace(/\s+/g, ' ')] = fila[k];
+        norm[String(k).replace(/^\uFEFF/, '').replace(/\u200B/g, '').toLowerCase().trim().replace(/\s+/g, ' ')] = fila[k];
     });
     return norm;
+}
+
+// Busca la primera columna cuya clave contenga alguna de las palabras
+function buscarConteniendo(fila, palabras) {
+    for (const k in fila) {
+        const v = fila[k];
+        if (v === undefined || v === null || v === '') continue;
+        for (const p of palabras) {
+            if (k.includes(p)) return v;
+        }
+    }
+    return undefined;
 }
 
 // Busca la primera columna (de las candidatas) que exista y no esté vacía
@@ -346,7 +361,7 @@ function parsearFila(raw) {
     const p = {};
 
     const fecha = buscar(f, ['date', 'fecha', 'dia', 'horario', 'fecha/hora', 'fecha hora', 'datetime', 'fecha y hora']);
-    const liga = buscar(f, ['liga', 'ligas', 'liga/torneo', 'liga torneo', 'torneo', 'competencia', 'competicion', 'competición', 'competition', 'league', 'campeonato', 'championship', 'liga o torneo', 'division']);
+    const liga = buscarConteniendo(f, ['liga', 'torneo', 'competicion', 'competencia', 'competition', 'league', 'campeonato', 'championship', 'division', 'división', 'copa', 'categoria', 'categoría', 'serie', 'conferencia', 'grupo']);
     const local = buscarTexto(f, ['home', 'equipo local', 'equipo_local', 'local team', 'home team', 'casa', 'local', 'equipo']);
     const visita = buscarTexto(f, ['away', 'equipo visitante', 'equipo_visitante', 'away team', 'visitante', 'visita', 'equipo b']);
     const h = buscarNum(f, ['1x2_h', '1x2 h', '1x2 home', '1x2_home', 'prob local', 'local win', 'local_win', 'gana local', 'ganalocal', 'h1x2', 'h1', 'local']);
@@ -528,7 +543,7 @@ function cargarDatos(data) {
     }
     allData = data;
     Object.values(allData).forEach(ordenarPorHora);
-    localStorage.setItem('pronosticosData', JSON.stringify(allData));
+    localStorage.setItem(KEY_DATOS, JSON.stringify(allData));
     document.getElementById('status').textContent = `${Object.keys(allData).length} deporte(s), ${total} partidos cargados · ordenados por hora`;
     filtro = 'todos';
     busqueda = '';
