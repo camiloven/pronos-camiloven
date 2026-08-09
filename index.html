@@ -153,23 +153,6 @@ function obtenerTZ() {
 
 // ---------- Fechas y horas ----------
 
-// Interpreta una fecha/hora "naive" (sin zona) como hora de Chile
-// y devuelve el instante absoluto en milisegundos
-function componenteAUtc(tz, y, m, d, hh, mm) {
-    const dtf = new Intl.DateTimeFormat('en-US', { timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false });
-    const guess = new Date(Date.UTC(y, m - 1, d, hh, mm) - 4 * 3600 * 1000);
-    for (let i = 0; i < 6; i++) {
-        const parts = dtf.formatToParts(guess);
-        const get = (t) => parseInt(parts.find(p => p.type === t)?.value || '0', 10);
-        const wallUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
-        const delta = guess.getTime() - wallUtc;
-        const next = new Date(Date.UTC(y, m - 1, d, hh, mm) + delta);
-        if (next.getTime() === guess.getTime()) return next;
-        guess.setTime(next.getTime());
-    }
-    return guess;
-}
-
 // Número de fecha de Excel (serial) -> componentes
 function serialAComps(n) {
     const dt = new Date((n - 25569) * 86400 * 1000);
@@ -191,7 +174,9 @@ function extraerComponentes(s) {
     return { y, m, d, hh, mm };
 }
 
-// Parsea un valor de fecha del Excel a instante absoluto (ms)
+// Parsea un valor de fecha del Excel a instante absoluto (ms).
+// Las horas del Excel se interpretan como UTC y luego se convierten
+// a la zona elegida (celular o Chile).
 function parseFecha(valor) {
     const n = limpiarNumero(valor);
     let comps = null;
@@ -211,7 +196,7 @@ function parseFecha(valor) {
         const now = new Date();
         comps.y = now.getFullYear(); comps.m = now.getMonth() + 1; comps.d = now.getDate();
     }
-    return componenteAUtc('America/Santiago', comps.y, comps.m, comps.d, comps.hh, comps.mm).getTime();
+    return Date.UTC(comps.y, comps.m - 1, comps.d, comps.hh, comps.mm);
 }
 
 function diaEnTz(ts, tz) {
