@@ -10,6 +10,8 @@
         body {background:#0a0a0a; color:#e5e5e5; font-family:system-ui,sans-serif; margin:0;}
         .card {background:#171717; border:1px solid #444; border-radius:20px; padding:20px; margin:16px 0;}
         .tab {padding:12px 24px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
+        #dropzone {border:2px dashed #666; border-radius:20px; transition:all .2s;}
+        #dropzone.dragover {border-color:#facc15; background:rgba(250,204,21,.08);}
     </style>
 </head>
 <body class="pb-12">
@@ -29,18 +31,235 @@
         <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-7 rounded-3xl font-bold text-xl">
             📁 CARGAR EXCEL
         </button>
-        <input type="file" id="fileInput" accept=".xlsx" class="hidden">
+        <div id="dropzone" class="mt-4 p-6 text-center text-sm text-gray-400 rounded-3xl">
+            O arrastra tu archivo .xlsx aquí
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden">
+        <div id="status" class="mt-3 text-center text-sm text-gray-400"></div>
     </div>
 
     <div id="sportTabs" class="flex flex-wrap gap-2 px-6 pb-4"></div>
+    <div class="px-6 pb-4 flex items-center gap-2 text-sm">
+        <span class="text-gray-400">Hora:</span>
+        <button id="zonaAuto" class="tab bg-yellow-400 text-black">Mi celular</button>
+        <button id="zonaChile" class="tab bg-zinc-800 text-white">Chile</button>
+    </div>
     <div id="content" class="px-6"></div>
 
 <script>
 let allData = {};
+let zona = 'auto'; // 'auto' = hora del celular, 'chile' = America/Santiago
+
+// Zona horaria actual del dispositivo
+function obtenerTZ() {
+    if (zona === 'chile') return 'America/Santiago';
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Santiago';
+}
+
+// ---------- Fechas y horas ----------
+
+// Interpreta una fecha/hora "naive" (sin zona) como hora de Chile
+// y devuelve el instante absoluto en milisegundos
+function componenteAUtc(tz, y, m, d, hh, mm) {
+    const dtf = new Intl.DateTimeFormat('en-US', { timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false });
+    const guess = new Date(Date.UTC(y, m - 1, d, hh, mm) - 4 * 3600 * 1000);
+    for (let i = 0; i < 6; i++) {
+        const parts = dtf.formatToParts(guess);
+        const get = (t) => parseInt(parts.find(p => p.type === t)?.value || '0', 10);
+        const wallUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
+        const delta = guess.getTime() - wallUtc;
+        const next = new Date(Date.UTC(y, m - 1, d, hh, mm) + delta);
+        if (next.getTime() === guess.getTime()) return next;
+        guess.setTime(next.getTime());
+    }
+    return guess;
+}
+
+// Número de fecha de Excel (serial) -> componentes
+function serialAComps(n) {
+    const dt = new Date((n - 25569) * 86400 * 1000);
+    return { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate(), hh: dt.getUTCHours(), mm: dt.getUTCMinutes() };
+}
+
+// Extrae año/mes/día/hora/min de una cadena flexible
+function extraerComponentes(s) {
+    let y = null, m = null, d = null, hh = 0, mm = 0;
+    let mF = s.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+    if (mF) { y = +mF[1]; m = +mF[2]; d = +mF[3]; }
+    else {
+        mF = s.match(/(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
+        if (mF) { d = +mF[1]; m = +mF[2]; y = +mF[3]; }
+    }
+    const tF = s.match(/(\d{1,2})[:h](\d{2})/);
+    if (tF) { hh = +tF[1]; mm = +tF[2]; }
+    if (y === null) return null;
+    return { y, m, d, hh, mm };
+}
+
+// Parsea un valor de fecha del Excel a instante absoluto (ms)
+function parseFecha(valor) {
+    const n = limpiarNumero(valor);
+    let comps = null;
+    if (n !== null && n > 20000 && n < 60000) {
+        comps = serialAComps(n);
+    } else {
+        const s = String(valor).trim();
+        if (!s) return null;
+        comps = extraerComponentes(s);
+        if (!comps) {
+            const t = Date.parse(s);
+            return isNaN(t) ? null : t;
+        }
+    }
+    // Si falta la fecha, usar el día de hoy
+    if (comps.y === null) {
+        const now = new Date();
+        comps.y = now.getFullYear(); comps.m = now.getMonth() + 1; comps.d = now.getDate();
+    }
+    return componenteAUtc('America/Santiago', comps.y, comps.m, comps.d, comps.hh, comps.mm).getTime();
+}
+
+function diaEnTz(ts, tz) {
+    const dtf = new Intl.DateTimeFormat('en-US', { timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric' });
+    const p = dtf.formatToParts(ts ? new Date(ts) : new Date());
+    const get = (t) => parseInt(p.find(x => x.type === t)?.value || '0', 10);
+    return Date.UTC(get('year'), get('month') - 1, get('day'));
+}
+
+function formatearHora(ts) {
+    if (ts === undefined || ts === null) return '';
+    const tz = obtenerTZ();
+    const d = new Date(ts);
+    const hoy = diaEnTz(null, tz);
+    const dia = diaEnTz(ts, tz);
+    const diff = Math.round((dia - hoy) / 86400000);
+    let label;
+    if (diff === 0) label = 'Hoy';
+    else if (diff === 1) label = 'Mañana';
+    else if (diff === -1) label = 'Ayer';
+    else {
+        label = new Intl.DateTimeFormat('es-CL', { timeZone: tz, day: 'numeric', month: 'short' }).format(d);
+    }
+    const hora = new Intl.DateTimeFormat('es-CL', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(d);
+    return `${label} · ${hora}`;
+}
+
+// Ordena una lista por hora de inicio (los sin hora quedan al final)
+function ordenarPorHora(lista) {
+    lista.forEach(p => {
+        if (p._ts === undefined) p._ts = p.date ? parseFecha(p.date) : null;
+        if (p._ts === undefined) p._ts = null;
+    });
+    lista.sort((x, y) => {
+        const a = x._ts === null ? Infinity : x._ts;
+        const b = y._ts === null ? Infinity : y._ts;
+        return a - b;
+    });
+    return lista;
+}
 
 if (localStorage.getItem('pronosticosData')) {
-    allData = JSON.parse(localStorage.getItem('pronosticosData'));
+    try {
+        allData = JSON.parse(localStorage.getItem('pronosticosData'));
+        Object.values(allData).forEach(ordenarPorHora);
+    } catch (e) {
+        allData = {};
+    }
 }
+
+// ---------- Parseo flexible del Excel ----------
+
+function limpiarNumero(v) {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'number') return v;
+    const s = String(v).trim().replace(/%$/, '').replace(',', '.');
+    const n = parseFloat(s);
+    return isNaN(n) ? null : n;
+}
+
+function normalizarClaves(fila) {
+    const norm = {};
+    Object.keys(fila).forEach(k => {
+        norm[String(k).toLowerCase().trim().replace(/\s+/g, ' ')] = fila[k];
+    });
+    return norm;
+}
+
+// Busca la primera columna (de las candidatas) que exista y no esté vacía
+function buscar(fila, candidatas) {
+    for (const c of candidatas) {
+        const v = fila[c];
+        if (v !== undefined && v !== null && v !== '') return v;
+    }
+    return undefined;
+}
+
+// Busca candidata cuyo valor sea texto (para nombres de equipos)
+function buscarTexto(fila, candidatas) {
+    for (const c of candidatas) {
+        const v = fila[c];
+        if (v !== undefined && v !== null && v !== '' && limpiarNumero(v) === null) return v;
+    }
+    return undefined;
+}
+
+// Busca candidata cuyo valor sea numérico (para probabilidades)
+function buscarNum(fila, candidatas) {
+    for (const c of candidatas) {
+        const v = fila[c];
+        if (limpiarNumero(v) !== null) return v;
+    }
+    return undefined;
+}
+
+// Convierte a probabilidad 0-1 (acepta 0.75 o 75)
+function aProb(v) {
+    const n = limpiarNumero(v);
+    if (n === null) return 0;
+    return n > 1 ? n / 100 : n;
+}
+
+function parsearFila(raw) {
+    const f = normalizarClaves(raw);
+    const p = {};
+
+    const fecha = buscar(f, ['date', 'fecha', 'dia', 'horario', 'fecha/hora', 'fecha hora', 'datetime', 'fecha y hora']);
+    const local = buscarTexto(f, ['home', 'equipo local', 'equipo_local', 'local team', 'home team', 'casa', 'local', 'equipo']);
+    const visita = buscarTexto(f, ['away', 'equipo visitante', 'equipo_visitante', 'away team', 'visitante', 'visita', 'equipo b']);
+    const h = buscarNum(f, ['1x2_h', '1x2 h', '1x2 home', '1x2_home', 'prob local', 'local win', 'local_win', 'gana local', 'ganalocal', 'h1x2', 'h1', 'local']);
+    const d = buscarNum(f, ['1x2_d', '1x2 d', '1x2 draw', '1x2_draw', 'prob empate', 'draw prob', 'empate', 'prob x', 'x']);
+    const a = buscarNum(f, ['1x2_a', '1x2 a', '1x2 away', '1x2_away', 'prob visitante', 'away win', 'away_win', 'gana visitante', 'ganavisitante', 'a2', 'visita', 'visitante']);
+
+    p.date = fecha !== undefined ? String(fecha) : '';
+    p._ts = fecha !== undefined ? parseFecha(fecha) : null;
+    p.home = local !== undefined ? String(local).trim() : '';
+    p.away = visita !== undefined ? String(visita).trim() : '';
+    p['1x2_h'] = aProb(h);
+    p['1x2_d'] = aProb(d);
+    p['1x2_a'] = aProb(a);
+
+    // Over/Under: reconoce columnas como "Over 2.5", "Under 1.5", "o_2.5", "u_3.5", "O2.5", "U2.5"
+    Object.keys(f).forEach(k => {
+        const m = k.match(/^(?:over|mas|más|o)[\s_]*(?:goles\s*)?(\d+(?:[.,]\d+)?)$/i);
+        if (m) p['o_' + m[1].replace(',', '.')] = aProb(f[k]);
+        const m2 = k.match(/^(?:under|menos|u)[\s_]*(?:goles\s*)?(\d+(?:[.,]\d+)?)$/i);
+        if (m2) p['u_' + m2[1].replace(',', '.')] = aProb(f[k]);
+    });
+
+    return p;
+}
+
+function parsearLibro(wb) {
+    const data = {};
+    wb.SheetNames.forEach(nombre => {
+        const filas = XLSX.utils.sheet_to_json(wb.Sheets[nombre], { defval: '' });
+        const limpias = filas.map(parsearFila).filter(r => r.home || r.away);
+        if (limpias.length > 0) data[nombre] = limpias;
+    });
+    return data;
+}
+
+// ---------- Render ----------
 
 function renderTabs() {
     const container = document.getElementById('sportTabs');
@@ -49,73 +268,116 @@ function renderTabs() {
         const btn = document.createElement('button');
         btn.textContent = sport.toUpperCase();
         btn.className = `tab ${Object.keys(allData)[0] === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
-        btn.onclick = () => mostrarDeporte(sport);
+        btn.onclick = () => { deporteActual = sport; mostrarDeporte(sport); };
         container.appendChild(btn);
     });
 }
 
 function mostrarDeporte(sport) {
-    const data = allData[sport] || [];
-    let html = `<h2 class="text-yellow-400 text-3xl font-bold mb-8 px-2 capitalize">${sport}</h2>`;
+    const data = ordenarPorHora(allData[sport] || []);
+    let html = `<h2 class="text-yellow-400 text-3xl font-bold mb-8 px-2 capitalize">${sport}</h2>
+        <p class="text-gray-500 text-sm mb-4 px-2">${data.length} partidos cargados</p>`;
 
     data.forEach(p => {
-        const h = Math.round((p['1x2_h']||0)*100);
-        const d = Math.round((p['1x2_d']||0)*100);
-        const a = Math.round((p['1x2_a']||0)*100);
+        const h = Math.round((p['1x2_h'] || 0) * 100);
+        const d = Math.round((p['1x2_d'] || 0) * 100);
+        const a = Math.round((p['1x2_a'] || 0) * 100);
 
         let ouHTML = '';
         const thresholds = [1.5, 2.5, 3.5];
         thresholds.forEach(th => {
-            if (p[`o_${th}`] !== undefined) {
-                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Over \( {th}</span><span class="text-green-400 font-bold"> \){Math.round(p[`o_${th}`]*100)}%</span></div>`;
+            if (p['o_' + th] !== undefined && p['o_' + th] > 0) {
+                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Over ${th}</span><span class="text-green-400 font-bold">${Math.round(p['o_' + th] * 100)}%</span></div>`;
             }
-            if (p[`u_${th}`] !== undefined) {
-                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Under \( {th}</span><span class="text-red-400 font-bold"> \){Math.round(p[`u_${th}`]*100)}%</span></div>`;
+            if (p['u_' + th] !== undefined && p['u_' + th] > 0) {
+                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Under ${th}</span><span class="text-red-400 font-bold">${Math.round(p['u_' + th] * 100)}%</span></div>`;
             }
         });
 
         html += `
         <div class="card">
-            <div class="text-amber-400">${p.date || ''}</div>
+            <div class="text-amber-400 font-semibold">${formatearHora(p._ts) || (p.date || '')}</div>
             <div class="font-bold text-xl mt-2">${p.home} vs ${p.away}</div>
             <div class="grid grid-cols-3 gap-6 mt-8 text-center">
                 <div><div class="text-4xl font-bold text-green-400">${h}%</div><div class="text-xs">LOCAL</div></div>
                 <div><div class="text-4xl font-bold text-yellow-400">${d}%</div><div class="text-xs">EMPATE</div></div>
                 <div><div class="text-4xl font-bold text-red-400">${a}%</div><div class="text-xs">VISITA</div></div>
             </div>
-            \( {ouHTML ? `<div class="mt-6 bg-zinc-900 rounded-2xl p-4 text-sm"> \){ouHTML}</div>` : ''}
+            ${ouHTML ? `<div class="mt-6 bg-zinc-900 rounded-2xl p-4 text-sm">${ouHTML}</div>` : ''}
         </div>`;
     });
 
     document.getElementById('content').innerHTML = html || '<p class="text-center py-24 text-gray-500">Carga tu Excel</p>';
 }
 
+function cargarDatos(data) {
+    const total = Object.values(data).reduce((acc, lista) => acc + lista.length, 0);
+    if (total === 0) {
+        document.getElementById('status').textContent = 'No se encontraron partidos en el archivo.';
+        return;
+    }
+    allData = data;
+    Object.values(allData).forEach(ordenarPorHora);
+    localStorage.setItem('pronosticosData', JSON.stringify(allData));
+    document.getElementById('status').textContent = `${Object.keys(allData).length} deporte(s), ${total} partidos cargados · ordenados por hora`;
+    renderTabs();
+    deporteActual = Object.keys(allData)[0];
+    mostrarDeporte(deporteActual);
+}
+
+// ---------- Selector de zona horaria ----------
+
+function actualizarZonaUI() {
+    document.getElementById('zonaAuto').className = `tab ${zona === 'auto' ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
+    document.getElementById('zonaChile').className = `tab ${zona === 'chile' ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
+}
+
+document.getElementById('zonaAuto').onclick = () => { zona = 'auto'; actualizarZonaUI(); rerenderActual(); };
+document.getElementById('zonaChile').onclick = () => { zona = 'chile'; actualizarZonaUI(); rerenderActual(); };
+
+let deporteActual = null;
+function rerenderActual() {
+    if (deporteActual) mostrarDeporte(deporteActual);
+}
+
+// ---------- Upload ----------
+
 document.getElementById('fileInput').onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
+    leerArchivo(file);
+};
+
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('click', () => document.getElementById('fileInput').click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) leerArchivo(file);
+});
+
+function leerArchivo(file) {
     const reader = new FileReader();
     reader.onload = ev => {
         try {
-            const wb = XLSX.read(ev.target.result, {type:'binary'});
-            allData = {};
-            wb.SheetNames.forEach(name => {
-                const sheetData = XLSX.utils.sheet_to_json(wb.Sheets[name]);
-                if (sheetData.length > 0) allData[name] = sheetData;
-            });
-            localStorage.setItem('pronosticosData', JSON.stringify(allData));
-            renderTabs();
-            mostrarDeporte(Object.keys(allData)[0]);
-        } catch(err) {
-            alert('Error al leer el Excel');
+            const wb = XLSX.read(ev.target.result, { type: 'binary' });
+            cargarDatos(parsearLibro(wb));
+        } catch (err) {
+            alert('Error al leer el Excel. Asegúrate de que sea un archivo .xlsx válido.');
         }
     };
     reader.readAsBinaryString(file);
-};
+}
 
 // Cargar datos guardados automáticamente
+actualizarZonaUI();
 if (Object.keys(allData).length > 0) {
     renderTabs();
-    mostrarDeporte(Object.keys(allData)[0]);
+    deporteActual = Object.keys(allData)[0];
+    mostrarDeporte(deporteActual);
 }
 </script>
 </body>
