@@ -3,48 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0f19">
     <title>Pronos Camiloven</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };
+    </script>
     <style>
-        body {background:#0a0a0a; color:#e5e5e5; font-family:system-ui,sans-serif; margin:0;}
-        .card {background:#171717; border:1px solid #444; border-radius:20px; padding:20px; margin:16px 0;}
-        .tab {padding:12px 24px; border-radius:9999px; font-weight:bold; white-space:nowrap; margin:4px;}
-        #dropzone {border:2px dashed #666; border-radius:20px; transition:all .2s;}
-        #dropzone.dragover {border-color:#facc15; background:rgba(250,204,21,.08);}
+        body {
+            background:
+                radial-gradient(1200px 600px at 80% -10%, rgba(16,185,129,.10), transparent 60%),
+                radial-gradient(900px 500px at -10% 20%, rgba(245,158,11,.06), transparent 60%),
+                #0b0f19;
+            color: #e2e8f0;
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+        }
+        .card {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 18px;
+            padding: 22px;
+            margin: 14px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+            backdrop-filter: blur(6px);
+            transition: border-color .2s, transform .15s;
+        }
+        .card:hover { border-color: rgba(16,185,129,.45); transform: translateY(-1px); }
+        .tab {
+            padding: 10px 22px;
+            border-radius: 9999px;
+            font-weight: 700;
+            white-space: nowrap;
+            margin: 4px;
+            transition: all .2s;
+            border: 1px solid transparent;
+        }
+        .tab:hover { border-color: rgba(16,185,129,.5); }
+        #dropzone { border: 2px dashed rgba(255,255,255,.18); border-radius: 18px; transition: all .2s; }
+        #dropzone.dragover { border-color: #10b981; background: rgba(16,185,129,.08); }
+        ::selection { background: rgba(16,185,129,.35); }
     </style>
 </head>
 <body class="pb-12">
 
-    <div class="bg-gradient-to-r from-amber-500 to-yellow-500 text-black p-8 text-center">
-        <h1 class="text-4xl font-black">PRONOS CAMILOVEN</h1>
-        <p class="text-sm">HIGH PROBABILITY PICKS</p>
+    <header class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
+        <div class="absolute -top-20 -right-20 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 -left-16 w-72 h-72 bg-teal-400/20 rounded-full blur-3xl"></div>
+        <div class="relative p-8 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/25 text-amber-300 text-[11px] font-bold tracking-[.3em] uppercase mb-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse"></span>
+                High Probability Picks
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white drop-shadow-lg">PRONOS CAMILOVEN</h1>
+            <p class="mt-2 text-emerald-100/80 text-sm font-medium">Análisis y pronósticos deportivos con datos de IA</p>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-3 gap-3 p-6 max-w-3xl mx-auto">
+        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-white/5 border border-white/10 hover:bg-emerald-500/10 hover:border-emerald-400/40 p-4 rounded-2xl text-center text-sm font-semibold transition">Betmines</button>
+        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-white/5 border border-white/10 hover:bg-emerald-500/10 hover:border-emerald-400/40 p-4 rounded-2xl text-center text-sm font-semibold transition">Forebet</button>
+        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-white/5 border border-white/10 hover:bg-emerald-500/10 hover:border-emerald-400/40 p-4 rounded-2xl text-center text-sm font-semibold transition">AdamChoi</button>
     </div>
 
-    <div class="grid grid-cols-3 gap-3 p-6">
-        <button onclick="window.open('https://www.betmines.com/es','_blank')" class="bg-zinc-900 p-4 rounded-3xl text-center text-sm">Betmines</button>
-        <button onclick="window.open('https://www.forebet.com/es/predicciones','_blank')" class="bg-zinc-900 p-4 rounded-3xl text-center text-sm">Forebet</button>
-        <button onclick="window.open('https://www.adamchoi.co.uk/','_blank')" class="bg-zinc-900 p-4 rounded-3xl text-center text-sm">AdamChoi</button>
-    </div>
-
-    <div class="px-6">
-        <button onclick="document.getElementById('fileInput').click()" class="w-full bg-yellow-400 text-black py-7 rounded-3xl font-bold text-xl">
+    <div class="px-6 max-w-3xl mx-auto">
+        <button onclick="document.getElementById('fileInput').click()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-black py-6 rounded-2xl font-black text-lg shadow-lg shadow-emerald-900/40 hover:from-emerald-400 hover:to-teal-400 hover:-translate-y-0.5 active:translate-y-0 transition">
             📁 CARGAR EXCEL
         </button>
-        <div id="dropzone" class="mt-4 p-6 text-center text-sm text-gray-400 rounded-3xl">
+        <div id="dropzone" class="mt-4 p-6 text-center text-sm text-gray-400 rounded-2xl bg-white/[.02]">
             O arrastra tu archivo .xlsx aquí
         </div>
         <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden">
         <div id="status" class="mt-3 text-center text-sm text-gray-400"></div>
     </div>
 
-    <div id="sportTabs" class="flex flex-wrap gap-2 px-6 pb-4"></div>
-    <div class="px-6 pb-4 flex items-center gap-2 text-sm">
-        <span class="text-gray-400">Hora:</span>
-        <button id="zonaAuto" class="tab bg-yellow-400 text-black">Mi celular</button>
-        <button id="zonaChile" class="tab bg-zinc-800 text-white">Chile</button>
+    <div id="sportTabs" class="flex flex-wrap justify-center gap-2 px-6 py-4"></div>
+    <div class="px-6 pb-4 flex justify-center items-center gap-2 text-sm">
+        <span class="text-gray-500 font-medium">Hora:</span>
+        <button id="zonaAuto" class="tab bg-emerald-500 text-black">Mi celular</button>
+        <button id="zonaChile" class="tab bg-white/10 text-white">Chile</button>
     </div>
-    <div id="content" class="px-6"></div>
+    <div id="content" class="px-6 max-w-3xl mx-auto"></div>
 
 <script>
 let allData = {};
@@ -267,7 +312,7 @@ function renderTabs() {
     Object.keys(allData).forEach(sport => {
         const btn = document.createElement('button');
         btn.textContent = sport.toUpperCase();
-        btn.className = `tab ${Object.keys(allData)[0] === sport ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
+        btn.className = `tab ${Object.keys(allData)[0] === sport ? 'bg-emerald-500 text-black' : 'bg-white/10 text-white'}`;
         btn.onclick = () => { deporteActual = sport; mostrarDeporte(sport); };
         container.appendChild(btn);
     });
@@ -275,8 +320,8 @@ function renderTabs() {
 
 function mostrarDeporte(sport) {
     const data = ordenarPorHora(allData[sport] || []);
-    let html = `<h2 class="text-yellow-400 text-3xl font-bold mb-8 px-2 capitalize">${sport}</h2>
-        <p class="text-gray-500 text-sm mb-4 px-2">${data.length} partidos cargados</p>`;
+    let html = `<h2 class="text-emerald-400 text-3xl font-black mb-2 px-2 capitalize">${sport}</h2>
+        <p class="text-gray-500 text-sm mb-6 px-2">${data.length} partidos cargados</p>`;
 
     data.forEach(p => {
         const h = Math.round((p['1x2_h'] || 0) * 100);
@@ -287,23 +332,28 @@ function mostrarDeporte(sport) {
         const thresholds = [1.5, 2.5, 3.5];
         thresholds.forEach(th => {
             if (p['o_' + th] !== undefined && p['o_' + th] > 0) {
-                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Over ${th}</span><span class="text-green-400 font-bold">${Math.round(p['o_' + th] * 100)}%</span></div>`;
+                ouHTML += `<div class="flex justify-between py-1.5 text-sm"><span class="text-gray-400">Over ${th}</span><span class="text-emerald-400 font-bold">${Math.round(p['o_' + th] * 100)}%</span></div>`;
             }
             if (p['u_' + th] !== undefined && p['u_' + th] > 0) {
-                ouHTML += `<div class="flex justify-between py-1 text-sm"><span>Under ${th}</span><span class="text-red-400 font-bold">${Math.round(p['u_' + th] * 100)}%</span></div>`;
+                ouHTML += `<div class="flex justify-between py-1.5 text-sm"><span class="text-gray-400">Under ${th}</span><span class="text-rose-400 font-bold">${Math.round(p['u_' + th] * 100)}%</span></div>`;
             }
         });
 
         html += `
         <div class="card">
-            <div class="text-amber-400 font-semibold">${formatearHora(p._ts) || (p.date || '')}</div>
-            <div class="font-bold text-xl mt-2">${p.home} vs ${p.away}</div>
-            <div class="grid grid-cols-3 gap-6 mt-8 text-center">
-                <div><div class="text-4xl font-bold text-green-400">${h}%</div><div class="text-xs">LOCAL</div></div>
-                <div><div class="text-4xl font-bold text-yellow-400">${d}%</div><div class="text-xs">EMPATE</div></div>
-                <div><div class="text-4xl font-bold text-red-400">${a}%</div><div class="text-xs">VISITA</div></div>
+            <div class="flex items-center justify-between">
+                <span class="inline-flex items-center gap-1.5 text-amber-300 font-semibold text-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+                    ${formatearHora(p._ts) || (p.date || 'Sin horario')}
+                </span>
             </div>
-            ${ouHTML ? `<div class="mt-6 bg-zinc-900 rounded-2xl p-4 text-sm">${ouHTML}</div>` : ''}
+            <div class="font-bold text-xl mt-3 text-white leading-snug">${p.home} <span class="text-gray-500 font-medium">vs</span> ${p.away}</div>
+            <div class="grid grid-cols-3 gap-3 mt-7 text-center">
+                <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl py-4"><div class="text-3xl font-black text-emerald-400">${h}%</div><div class="text-[10px] font-bold tracking-widest text-emerald-400/70 mt-1">LOCAL</div></div>
+                <div class="bg-sky-500/10 border border-sky-500/20 rounded-2xl py-4"><div class="text-3xl font-black text-sky-400">${d}%</div><div class="text-[10px] font-bold tracking-widest text-sky-400/70 mt-1">EMPATE</div></div>
+                <div class="bg-rose-500/10 border border-rose-500/20 rounded-2xl py-4"><div class="text-3xl font-black text-rose-400">${a}%</div><div class="text-[10px] font-bold tracking-widest text-rose-400/70 mt-1">VISITA</div></div>
+            </div>
+            ${ouHTML ? `<div class="mt-5 bg-black/30 border border-white/5 rounded-2xl p-4">${ouHTML}</div>` : ''}
         </div>`;
     });
 
@@ -328,8 +378,8 @@ function cargarDatos(data) {
 // ---------- Selector de zona horaria ----------
 
 function actualizarZonaUI() {
-    document.getElementById('zonaAuto').className = `tab ${zona === 'auto' ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
-    document.getElementById('zonaChile').className = `tab ${zona === 'chile' ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-white'}`;
+    document.getElementById('zonaAuto').className = `tab ${zona === 'auto' ? 'bg-emerald-500 text-black' : 'bg-white/10 text-white'}`;
+    document.getElementById('zonaChile').className = `tab ${zona === 'chile' ? 'bg-emerald-500 text-black' : 'bg-white/10 text-white'}`;
 }
 
 document.getElementById('zonaAuto').onclick = () => { zona = 'auto'; actualizarZonaUI(); rerenderActual(); };
