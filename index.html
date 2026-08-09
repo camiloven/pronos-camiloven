@@ -346,6 +346,7 @@ function parsearFila(raw) {
     const p = {};
 
     const fecha = buscar(f, ['date', 'fecha', 'dia', 'horario', 'fecha/hora', 'fecha hora', 'datetime', 'fecha y hora']);
+    const liga = buscar(f, ['liga', 'ligas', 'liga/torneo', 'liga torneo', 'torneo', 'competencia', 'competicion', 'competición', 'competition', 'league', 'campeonato', 'championship', 'liga o torneo', 'division']);
     const local = buscarTexto(f, ['home', 'equipo local', 'equipo_local', 'local team', 'home team', 'casa', 'local', 'equipo']);
     const visita = buscarTexto(f, ['away', 'equipo visitante', 'equipo_visitante', 'away team', 'visitante', 'visita', 'equipo b']);
     const h = buscarNum(f, ['1x2_h', '1x2 h', '1x2 home', '1x2_home', 'prob local', 'local win', 'local_win', 'gana local', 'ganalocal', 'h1x2', 'h1', 'local']);
@@ -354,6 +355,7 @@ function parsearFila(raw) {
 
     p.date = fecha !== undefined ? String(fecha) : '';
     p._ts = fecha !== undefined ? parseFecha(fecha) : null;
+    p.liga = liga !== undefined ? String(liga).trim() : '';
     p.home = local !== undefined ? String(local).trim() : '';
     p.away = visita !== undefined ? String(visita).trim() : '';
     p['1x2_h'] = aProb(h);
@@ -482,8 +484,9 @@ function mostrarDeporte() {
             if (p['u_' + th] !== undefined && p['u_' + th] > 0) ouHTML += fmt('u_' + th, 'bg-rose-400', 'text-rose-400', 'Under');
         });
 
-        const badge = p._deporte
-            ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"><i class="ti ${iconoDeporte(p._deporte)}"></i>${p._deporte}</span>`
+        const ligaTxt = p.liga || (p._deporte || tabActivo) || '';
+        const badge = ligaTxt
+            ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"><i class="ti ${iconoDeporte(ligaTxt)}"></i>${ligaTxt}</span>`
             : '';
 
         const celda1x2 = (val, col, txt, k) => `
@@ -615,7 +618,7 @@ function generarTexto() {
             const d = Math.round((p['1x2_d'] || 0) * 100);
             const a = Math.round((p['1x2_a'] || 0) * 100);
             lineas.push((i + 1) + '. ' + (formatearHora(p._ts) || (p.date || 'Sin horario')));
-            lineas.push('   ' + p.home + ' vs ' + p.away);
+            lineas.push('   ' + (p.liga || nombre) + ': ' + p.home + ' vs ' + p.away);
             if (h || d || a) lineas.push('   1X2: ' + h + '% - ' + d + '% - ' + a + '%');
             const ou = [];
             [1.5, 2.5, 3.5].forEach(th => {
