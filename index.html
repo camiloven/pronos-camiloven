@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script type="module" src="/@vite/client"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b0f19">
     <title>Pronos Camiloven</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pronos">
@@ -422,6 +424,27 @@ function obtenerDatosFiltrados() {
     return lista;
 }
 
+function agruparPorLiga(lista) {
+    const grupos = {};
+    lista.forEach(p => {
+        const liga = String(p.liga || p._deporte || tabActivo || 'Otros').trim() || 'Otros';
+        if (!grupos[liga]) grupos[liga] = [];
+        grupos[liga].push(p);
+    });
+    return Object.keys(grupos)
+        .sort((a, b) => {
+            const ta = grupos[a][0]._ts == null ? Infinity : grupos[a][0]._ts;
+            const tb = grupos[b][0]._ts == null ? Infinity : grupos[b][0]._ts;
+            if (ta !== tb) return ta - tb;
+            return a.localeCompare(b, 'es');
+        })
+        .map(liga => ({ liga, partidos: grupos[liga] }));
+}
+
+function etiquetaZona() {
+    return zona === 'chile' ? 'Chile' : 'mi celular';
+}
+
 // ---------- Render ----------
 
 function renderTabs() {
@@ -447,16 +470,7 @@ function barra(valor, color) {
     return `<div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-2"><div class="h-full rounded-full ${color}" style="width:${Math.max(valor, 2)}%"></div></div>`;
 }
 
-function mostrarDeporte() {
-    const data = obtenerDatosFiltrados();
-    const deportes = Object.keys(allData).length;
-    const titulo = tabActivo === 'todos' ? 'Todos los partidos' : tabActivo;
-
-    let html = `<h2 class="text-emerald-400 text-3xl font-black mb-2 px-2 capitalize">${titulo}</h2>
-        <p class="text-gray-500 text-sm mb-6 px-2">${data.length} de ${deportes} deporte(s) · ordenados por hora</p>`;
-
-    let cards = '';
-    data.forEach(p => {
+function renderCard(p) {
         const h = Math.round((p['1x2_h'] || 0) * 100);
         const d = Math.round((p['1x2_d'] || 0) * 100);
         const a = Math.round((p['1x2_a'] || 0) * 100);
@@ -503,7 +517,7 @@ function mostrarDeporte() {
                 <div class="text-[10px] font-bold tracking-widest text-gray-500 mt-1">${txt}</div>
             </div>`;
 
-        cards += `
+        return `
         <div class="card">
             <div class="flex items-center justify-between gap-3">
                 ${badge}
@@ -521,6 +535,29 @@ function mostrarDeporte() {
             </div>
             ${ouHTML ? `<div class="mt-5 bg-black/30 border border-white/5 rounded-2xl p-4">${ouHTML}</div>` : ''}
         </div>`;
+}
+
+function mostrarDeporte() {
+    const data = obtenerDatosFiltrados();
+    const grupos = agruparPorLiga(data);
+    const titulo = tabActivo === 'todos' ? 'Todos los partidos' : tabActivo;
+
+    let html = `<h2 class="text-emerald-400 text-3xl font-black mb-2 px-2 capitalize">${titulo}</h2>
+        <p class="text-gray-500 text-sm mb-6 px-2">${data.length} partido(s) · ${grupos.length} liga(s) · por hora (${etiquetaZona()})</p>`;
+
+    let cards = '';
+    grupos.forEach(({ liga, partidos }) => {
+        cards += `
+        <div class="mt-8 mb-3 px-1 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center shrink-0">
+                <i class="ti ${iconoDeporte(liga)} text-emerald-300 text-lg"></i>
+            </div>
+            <div class="min-w-0">
+                <h3 class="text-white font-black text-lg leading-tight truncate">${liga}</h3>
+                <p class="text-[11px] text-gray-500 font-medium">${partidos.length} partido${partidos.length === 1 ? '' : 's'} · hora ${etiquetaZona()}</p>
+            </div>
+        </div>`;
+        partidos.forEach(p => { cards += renderCard(p); });
     });
 
     document.getElementById('content').innerHTML = html + (cards || '<p class="text-center py-24 text-gray-500">No hay partidos que coincidan. Sube un Excel o cambia el filtro.</p>');
@@ -613,18 +650,22 @@ document.getElementById('busqueda').oninput = e => { busqueda = e.target.value.t
 function generarTexto() {
     const lineas = [];
     lineas.push('PRONOS CAMILOVEN - HIGH PROBABILITY PICKS');
+    lineas.push('Hora: ' + etiquetaZona());
     lineas.push('');
+    const lista = [];
     Object.keys(allData).forEach(nombre => {
-        const lista = ordenarPorHora(allData[nombre]);
-        if (lista.length === 0) return;
-        lineas.push('• ' + nombre.toUpperCase() + ' (' + lista.length + ')');
+        allData[nombre].forEach(p => lista.push(Object.assign({}, p, { _deporte: nombre })));
+    });
+    const grupos = agruparPorLiga(ordenarPorHora(lista));
+    grupos.forEach(({ liga, partidos }) => {
+        lineas.push('• ' + liga.toUpperCase() + ' (' + partidos.length + ')');
         lineas.push('');
-        lista.forEach((p, i) => {
+        partidos.forEach((p, i) => {
             const h = Math.round((p['1x2_h'] || 0) * 100);
             const d = Math.round((p['1x2_d'] || 0) * 100);
             const a = Math.round((p['1x2_a'] || 0) * 100);
             lineas.push((i + 1) + '. ' + (formatearHora(p._ts) || (p.date || 'Sin horario')));
-            lineas.push('   ' + (p.liga || nombre) + ': ' + p.home + ' vs ' + p.away);
+            lineas.push('   ' + p.home + ' vs ' + p.away);
             if (h || d || a) lineas.push('   1X2: ' + h + '% - ' + d + '% - ' + a + '%');
             const ou = [];
             [1.5, 2.5, 3.5].forEach(th => {
@@ -733,5 +774,6 @@ if (Object.keys(allData).length > 0) {
     iniciarContador();
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"3c7f84125ad544deae046fd599aeda84","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
