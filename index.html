@@ -120,6 +120,35 @@
     </div>
 
     <div class="px-6 max-w-3xl mx-auto mt-6">
+        <div class="card">
+            <h2 class="text-center text-emerald-400 font-black text-xl tracking-tight">Calculadora +3.50</h2>
+            <p class="text-center text-gray-400 text-xs mt-1 mb-4">Pronostico de goles totales del partido</p>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="gl" class="block text-xs font-bold text-gray-400 mb-1">Goles del Local</label>
+                    <input type="number" id="gl" value="0" min="0" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-400/50 transition">
+                </div>
+                <div>
+                    <label for="rl" class="block text-xs font-bold text-gray-400 mb-1">Goles Recibidos Local</label>
+                    <input type="number" id="rl" value="0" min="0" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-400/50 transition">
+                </div>
+                <div>
+                    <label for="gv" class="block text-xs font-bold text-gray-400 mb-1">Goles del Visitante</label>
+                    <input type="number" id="gv" value="0" min="0" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-400/50 transition">
+                </div>
+                <div>
+                    <label for="rv" class="block text-xs font-bold text-gray-400 mb-1">Goles Recibidos Visitante</label>
+                    <input type="number" id="rv" value="0" min="0" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-400/50 transition">
+                </div>
+            </div>
+            <button onclick="calcularOver()" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-black py-4 rounded-2xl font-black text-base shadow-lg shadow-emerald-900/40 hover:from-emerald-400 hover:to-teal-400 hover:-translate-y-0.5 active:translate-y-0 transition">
+                CALCULAR
+            </button>
+            <div id="resultadoCalc" class="hidden mt-4 p-4 rounded-xl bg-black/25 text-center"></div>
+        </div>
+    </div>
+
+    <div class="px-6 max-w-3xl mx-auto mt-6">
         <div id="countdown" class="hidden mb-4 items-center justify-between gap-4 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 border border-emerald-400/30 rounded-2xl p-4">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center"><i class="ti ti-clock-2 text-emerald-300 text-xl"></i></div>
@@ -752,6 +781,29 @@ function mostrarToast(msg) {
     t.style.opacity = '1';
     clearTimeout(t._to);
     t._to = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+function calcularOver() {
+    const gl = parseFloat(document.getElementById('gl').value) || 0;
+    const rl = parseFloat(document.getElementById('rl').value) || 0;
+    const gv = parseFloat(document.getElementById('gv').value) || 0;
+    const rv = parseFloat(document.getElementById('rv').value) || 0;
+
+    const parteLocal = ((gl * 2) + rv) / 3;
+    const parteVisita = ((gv * 2) + rl) / 3;
+    const total = parteLocal + parteVisita;
+    const pasa = total > 3.50;
+
+    const div = document.getElementById('resultadoCalc');
+    div.classList.remove('hidden');
+    div.innerHTML = `
+        <p class="text-sm text-gray-300">Parte Local: <span class="font-bold text-white">${parteLocal.toFixed(2)}</span></p>
+        <p class="text-sm text-gray-300">Parte Visita: <span class="font-bold text-white">${parteVisita.toFixed(2)}</span></p>
+        <hr class="border-white/10 my-3">
+        <p class="font-black text-lg text-white">Total: ${total.toFixed(2)}</p>
+        <p class="mt-2 font-black ${pasa ? 'text-emerald-400' : 'text-red-400'}">${pasa ? 'SI: ' + total.toFixed(2) + ' (Mayor a 3.50)' : 'NO: ' + total.toFixed(2) + ' (Menor o igual a 3.50)'}</p>
+        <p class="text-[11px] text-gray-500 mt-2">(Dato: Esto equivale a que la suma total de goles del partido sea ${pasa ? '4 o mas' : '3 o menos'})</p>
+    `;
 }
 
 // ---------- Upload ----------
