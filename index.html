@@ -121,7 +121,7 @@
 
     <div class="px-6 max-w-3xl mx-auto mt-6">
         <div class="card">
-            <h2 class="text-center text-emerald-400 font-black text-xl tracking-tight">Calculadora +3.50</h2>
+            <h2 class="text-center text-emerald-400 font-black text-xl tracking-tight">Calculadora +2.90</h2>
             <p class="text-center text-gray-400 text-xs mt-1 mb-4">Pronostico de goles totales del partido</p>
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -792,7 +792,7 @@ function calcularOver() {
     const parteLocal = ((gl * 2) + rv) / 3;
     const parteVisita = ((gv * 2) + rl) / 3;
     const total = parteLocal + parteVisita;
-    const pasa = total > 3.50;
+    const pasa = total > 2.90;
 
     const div = document.getElementById('resultadoCalc');
     div.classList.remove('hidden');
@@ -801,8 +801,8 @@ function calcularOver() {
         <p class="text-sm text-gray-300">Parte Visita: <span class="font-bold text-white">${parteVisita.toFixed(2)}</span></p>
         <hr class="border-white/10 my-3">
         <p class="font-black text-lg text-white">Total: ${total.toFixed(2)}</p>
-        <p class="mt-2 font-black ${pasa ? 'text-emerald-400' : 'text-red-400'}">${pasa ? 'SI: ' + total.toFixed(2) + ' (Mayor a 3.50)' : 'NO: ' + total.toFixed(2) + ' (Menor o igual a 3.50)'}</p>
-        <p class="text-[11px] text-gray-500 mt-2">(Dato: Esto equivale a que la suma total de goles del partido sea ${pasa ? '4 o mas' : '3 o menos'})</p>
+        <p class="mt-2 font-black ${pasa ? 'text-emerald-400' : 'text-red-400'}">${pasa ? 'SI: ' + total.toFixed(2) + ' (Mayor a 2.90)' : 'NO: ' + total.toFixed(2) + ' (Menor o igual a 2.90)'}</p>
+        <p class="text-[11px] text-gray-500 mt-2">(Dato: Esto equivale a que la suma total de goles del partido sea ${pasa ? '3 o mas' : '2 o menos'})</p>
     `;
 }
 
